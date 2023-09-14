@@ -607,7 +607,7 @@ namespace lcss
 
 	void KLVEncodeVisitor::Visit(lcss::KLVPlatformFuelRemaining& klv)
 	{
-		uint16_t LDS = (uint)(0xFFFF / 10000 * dblValue);
+		uint16_t LDS = (uint16_t)(0xFFFF / 10000 * dblValue);
 		LDS = htons(LDS);
 		memcpy(value, &LDS, 2);
 		klv.setValue(value, 2);
