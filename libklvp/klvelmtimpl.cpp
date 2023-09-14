@@ -1,7 +1,10 @@
 #include "klvelmtimpl.h"
 #include <iterator>
+#include <memory.h>
 #ifdef WIN32
 #include <WinSock2.h>
+#else
+#include <netinet/in.h>
 #endif
 // klvlex generated on Tue Jan 12 07:41:50 2021
 
@@ -33,7 +36,11 @@ int lcss::KLVElementImpl::key(uint8_t* keybuf) const
 	}
 	else if (key_.size() == 16)
 	{
+#ifdef WIN32
 		std::copy(key_.begin(), key_.end(), stdext::checked_array_iterator<uint8_t*>(keybuf, 16));
+#else
+		std::copy(key_.begin(), key_.end(), keybuf);
+#endif
 		return 16;
 	}
 	else if (key_[0] < 128)
@@ -59,7 +66,13 @@ void lcss::KLVElementImpl::setKey(uint8_t key)
 int lcss::KLVElementImpl::length() const
 {return (int)value_.size();}
 void lcss::KLVElementImpl::value(uint8_t* buf) const
-{std::copy(value_.begin(), value_.end(), stdext::checked_array_iterator<uint8_t*>(buf,length()));}
+{
+#ifdef WIN32
+	std::copy(value_.begin(), value_.end(), stdext::checked_array_iterator<uint8_t*>(buf,length()));
+#else
+	std::copy(value_.begin(), value_.end(), buf);
+#endif
+}
 uint8_t* lcss::KLVElementImpl::value() { return value_.data(); }
 void lcss::KLVElementImpl::setValue(uint8_t* buf, int bufsz)
 {
@@ -111,7 +124,7 @@ int lcss::KLVElementImpl::serialize(uint8_t* buf, int bufsz) const
 			}
 			else if (length() > 0xFF && length() < 0x00010000) {
 				buf[cur++] = 0x82;
-				UINT16 sz = htons(length());
+				uint16_t sz = htons(length());
 				uint8_t s[2];
 				memcpy(s, (void*)&sz, 2);
 				buf[cur++] = s[0];

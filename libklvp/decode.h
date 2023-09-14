@@ -300,7 +300,12 @@ namespace lcss
 		void Visit(lcss::KLVWaypointList& klv);
 
 	public:
+
+	#ifdef WIN32
 		__time64_t	tmValue;
+	#else
+		int64_t     tmValue;
+	#endif
 		double		fValue;
 		int			nValue;
 		std::string	strValue;

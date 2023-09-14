@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <cstdio>
 
 #define MAX_DATA BUFSIZ
 

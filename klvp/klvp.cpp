@@ -5,8 +5,11 @@
 
 #include "TestKLVParser.h"
 #include "KLVPrintVisitor.h"
-#include <conio.h>
+
 #include <fstream>
+#ifdef WIN32
+#include <conio.h>
+#endif 
 
 using namespace std;
 

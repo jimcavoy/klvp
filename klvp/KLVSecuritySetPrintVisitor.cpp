@@ -3,8 +3,12 @@
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
+#include <string.h>
 #ifdef WIN32
 #include <WinSock2.h>
+#else
+#include <netinet/in.h>
+#define sprintf_s sprintf
 #endif
 
 // klvsslex generated on Tue Aug 06 10:36:49 2013

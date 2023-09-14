@@ -5,6 +5,13 @@
 #include <iterator>
 #include <map>
 #include <cstdint>
+#include <cstring>
+
+#ifndef WIN32
+#define strcpy_s strcpy
+#define sprintf_s sprintf
+#endif
+
 
 using namespace std;
 
@@ -60,37 +67,54 @@ bool LDSDatabase::is_open() const
 void LDSDatabase::create_sqlstmt(char* stmt, size_t sz, const LDSEntry& entry)
 {
 	const char* select = "select Name, Units, Format, Description from UasLds where (";
+#ifdef WIN32
 	strcpy_s(stmt, sz, select);
+#else
+	strcpy(stmt, select);
+#endif
 
 	char no[6]{};
-
+#ifdef WIN32
 	strcat_s(stmt, sz, "Key=");
+#else
+	strcat(stmt, "Key=");
+#endif
 
 	uint16_t value = 0;
 	value = (uint16_t)entry.key;
-
+#ifdef WIN32
 	sprintf_s(no, "%d", value);
 	strcat_s(stmt, sz, no);
-
 	strcat_s(stmt, sz, "\n)");
+#else
+	sprintf(no, "%d", value);
+	strcat(stmt, no);
+	strcat(stmt, "\n");
+#endif
+
+	
 }
 
 void LDSDatabase::create_security_sqlstmt(char* stmt, size_t sz, const LDSEntry& entry)
 {
 	const char* select = "select Name, Units, Format from SecurityLds where (";
-	strcpy_s(stmt, sz, select);
-
 	char no[6]{};
-
-	strcat_s(stmt, sz, "Key=");
-
 	uint16_t value = 0;
 	value = (uint16_t)entry.key;
 
+#ifdef WIN32
+	strcpy_s(stmt, sz, select);
+	strcat_s(stmt, sz, "Key=");
 	sprintf_s(no, "%d", value);
 	strcat_s(stmt, sz, no);
-
 	strcat_s(stmt, sz, "\n)");
+#else
+	strcpy(stmt, select);
+	strcat(stmt, "Key=");
+	sprintf(no, "%d", value);
+	strcat(stmt, no);
+	strcat(stmt, "\n)");
+#endif
 }
 
 static int fetch_callback(void* data, int argc, char** argv, char** azColName)

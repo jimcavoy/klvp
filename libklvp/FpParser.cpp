@@ -5,7 +5,12 @@
 #include <memory.h>
 #ifdef WIN32
 #include <winsock2.h>
+#else
+#include <netinet/in.h>
 #endif
+
+uint64_t ntohll ( uint64_t Value );
+uint64_t htonll ( uint64_t Value );
 
 static uint8_t POSITIVE_INFINITY_HIGH_BYTE = 0xC8;
 static uint8_t NEGATIVE_INFINITY_HIGH_BYTE = 0xE8;
@@ -47,11 +52,11 @@ int FpParser::encode(unsigned char* buffer, int bufsiz, double value)
 		return 1;
 	}
 
-	if (isinf(value)) {
+	if (std::isinf(value)) {
 		memset(buffer, 0, bufsiz);
 		buffer[0] = POSITIVE_INFINITY_HIGH_BYTE;
 	}
-	else if (isnan(value)) {
+	else if (std::isnan(value)) {
 		memset(buffer, 0, bufsiz);
 		buffer[0] = POSITIVE_QUIET_NAN_HIGH_BYTE;
 	}
@@ -74,7 +79,7 @@ int FpParser::encode(unsigned char* buffer, int bufsiz, double value)
 		case 3:
 		{
 			int i = (int)d;
-			uint8_t temp[4];
+			uint8_t temp[4]{};
 			memcpy(temp, &i, 4);
 			// place in network order (i.e. Big Endian)
 			buffer[0] = temp[2];
