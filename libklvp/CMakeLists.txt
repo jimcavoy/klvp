@@ -28,13 +28,11 @@ file(GLOB SRC_LIST
 add_library(libklvp STATIC ${SRC_LIST})
 set_property(TARGET libklvp PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-if(WIN32)
-    include_directories(../../loki-lib/include)
+include_directories(../../loki-lib/include)
+
+if(WIN32)    
     target_link_libraries(libklvp PRIVATE Microsoft.GSL::GSL wsock32 ws2_32)
-else()
-    target_include_directories(libh264p 
-        PUBLIC
-        $ENV{HOME}/.vs/loki-lib/include)
+else()    
     target_link_libraries(libklvp PRIVATE Microsoft.GSL::GSL)
     set_target_properties(libklvp 
         PROPERTIES

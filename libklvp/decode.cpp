@@ -3,8 +3,27 @@
 #include "FpParser.h"
 
 #include <cstdint>
+#include <string.h>
 #ifdef WIN32
 #include <WinSock2.h>
+#else
+#include <netinet/in.h>
+
+#define _WS2_32_WINSOCK_SWAP_LONGLONG(l)            \
+            ( ( ((l) >> 56) & 0x00000000000000FFLL ) |       \
+              ( ((l) >> 40) & 0x000000000000FF00LL ) |       \
+              ( ((l) >> 24) & 0x0000000000FF0000LL ) |       \
+              ( ((l) >>  8) & 0x00000000FF000000LL ) |       \
+              ( ((l) <<  8) & 0x000000FF00000000LL ) |       \
+              ( ((l) << 24) & 0x0000FF0000000000LL ) |       \
+              ( ((l) << 40) & 0x00FF000000000000LL ) |       \
+              ( ((l) << 56) & 0xFF00000000000000LL ) )
+
+uint64_t ntohll ( uint64_t Value ) 
+{ 
+    const uint64_t Retval = _WS2_32_WINSOCK_SWAP_LONGLONG (Value);
+    return Retval;
+}
 #endif
 
 namespace lcss
@@ -29,15 +48,15 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVChecksum& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		nValue = (int) nVal;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVUNIXTimeStamp& klv)
 	{
-		__int64 lVal;
+		int64_t lVal;
 		memcpy(&lVal, klv.value(), 8);
 		tmValue = ntohll(lVal);
 	}
@@ -54,9 +73,9 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVPlatformHeadingAngle& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = 360.0 / 0xFFFF * LDS;
 	}
 
@@ -125,33 +144,33 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVSensorTrueAltitude& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = (19900.0 / 0xFFFF * LDS) - 900;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVSensorHorizontalFieldofView& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = 180.0 / 0xFFFF * LDS;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVSensorVerticalFieldofView& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = 180.0 / 0xFFFF * LDS;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVSensorRelativeAzimuthAngle& klv)
 	{
-		UINT32 nVal;
+		uint32_t nVal;
 		memcpy(&nVal, klv.value(), 4);
-		UINT32 LDS = (UINT32)ntohl(nVal);
+		uint32_t LDS = (uint32_t)ntohl(nVal);
 		fValue = 360.0 / 0xFFFFFFFF * LDS;
 	}
 
@@ -165,25 +184,25 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVSensorRelativeRollAngle& klv)
 	{
-		UINT32 nVal;
+		uint32_t nVal;
 		memcpy(&nVal, klv.value(), 4);
-		UINT32 LDS = (UINT32)ntohl(nVal);
+		uint32_t LDS = (uint32_t)ntohl(nVal);
 		fValue = 360.0 / 0xFFFFFFFF * LDS;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVSlantRange& klv)
 	{
-		UINT32 nVal;
+		uint32_t nVal;
 		memcpy(&nVal, klv.value(), 4);
-		UINT32 LDS = ntohl(nVal);
+		uint32_t LDS = ntohl(nVal);
 		fValue = 5000000.0 / 0xFFFFFFFF * LDS;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVTargetWidth& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = 10000.0 / 0xFFFF * LDS;
 	}
 
@@ -209,9 +228,9 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVFrameCenterElevation& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = (19900.0 / 0xFFFF * LDS) - 900;
 	}
 
@@ -286,15 +305,15 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVWindDirection& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = 360.0 / 0xFFFF * LDS;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVWindSpeed& klv)
 	{
-		UINT16 LDS = (UINT16)*klv.value();
+		uint16_t LDS = (uint16_t)*klv.value();
 		fValue = (100.0 / 0xFF) * LDS;
 	}
 
@@ -339,9 +358,9 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVTargetLocationElevation& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = (19900.0 / 0xFFFF * LDS) - 900;
 	}
 
@@ -357,14 +376,14 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVTargetErrorEstimateCE90& klv)
 	{
-		UINT16 LDS = 0;
+		uint16_t LDS = 0;
 		memcpy(&LDS, klv.value(), 2);
 		fValue = (4095.0 / 65535.0) * LDS;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVTargetErrorEstimateLE90& klv)
 	{
-		UINT16 LDS = 0;
+		uint16_t LDS = 0;
 		memcpy(&LDS, klv.value(), 2);
 		fValue = (4095.0 / 65535.0) * LDS;
 	}
@@ -421,15 +440,15 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVAirfieldElevation& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = (19900.0 / 0xFFFF * LDS) - 900;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVRelativeHumidity& klv)
 	{
-		UINT16 LDS = (UINT16)*klv.value();
+		uint16_t LDS = (uint16_t)*klv.value();
 		fValue = (100 / 0xFF) * LDS;
 	}
 
@@ -440,9 +459,9 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVGroundRange& klv)
 	{
-		UINT32 nVal;
+		uint32_t nVal;
 		memcpy(&nVal, klv.value(), 4);
-		UINT32 LDS = ntohl(nVal);
+		uint32_t LDS = ntohl(nVal);
 		fValue = 5000000.0 / 0xFFFFFFFF * LDS;
 	}
 
@@ -461,7 +480,7 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVWeaponLoad& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
 		nValue = (int) ntohs(nVal);
 	}
@@ -473,7 +492,7 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVLaserPRFCode& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
 		nValue = (int)ntohs(nVal);
 	}
@@ -485,9 +504,9 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVPlatformMagneticHeading& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = 360.0 / 0xFFFF * LDS;
 	}
 
@@ -521,9 +540,9 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVAlternatePlatformAltitude& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = (19900.0 / 0xFFFF * LDS) - 900;
 	}
 
@@ -542,7 +561,7 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVEventStartTimeUTC& klv)
 	{
-		__int64 lVal;
+		int64_t lVal;
 		memcpy(&lVal, klv.value(), 8);
 		tmValue = ntohll(lVal);
 	}
@@ -559,17 +578,17 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVSensorEllipsoidHeight& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = (19900.0 / 0xFFFF * LDS) - 900;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVAlternatePlatformEllipsoidHeight& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = (19900.0 / 0xFFFF * LDS) - 900;
 	}
 
@@ -580,9 +599,9 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVFrameCenterHeightAboveEllipsoid& klv)
 	{
-		UINT16 nVal;
+		uint16_t nVal;
 		memcpy(&nVal, klv.value(), 2);
-		UINT16 LDS = ntohs(nVal);
+		uint16_t LDS = ntohs(nVal);
 		fValue = (19900.0 / 0xFFFF * LDS) - 900;
 	}
 
@@ -920,9 +939,9 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVTakeoffTime& klv)
 	{
-		__int64 lVal;
+		int64_t lVal;
 		memcpy(&lVal, klv.value(), 8);
-		__time64_t time = ntohll(lVal);
+		int64_t time = ntohll(lVal);
 		tmValue = time / 1000000;
 	}
 
@@ -959,9 +978,9 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVCorrectionOffset& klv)
 	{
-		__int64 lVal;
+		int64_t lVal;
 		memcpy(&lVal, klv.value(), 8);
-		__time64_t time = ntohll(lVal);
+		int64_t time = ntohll(lVal);
 		tmValue = time / 1000000;
 	}
 
@@ -1022,7 +1041,7 @@ namespace lcss
 		return 0;
 	}
 
-	int decodeKey(int* numBytesRead, const BYTE* buffer, int size)
+	int decodeKey(int* numBytesRead, const uint8_t* buffer, int size)
 	{
 		int i = 0;
 		int decKey = 0;
@@ -1030,10 +1049,11 @@ namespace lcss
 			*numBytesRead = 1;
 			return buffer[i];
 		}
-		else {
+		else 
+		{
 			*numBytesRead = 2;
-			BYTE b1 = buffer[i++] & 0x7F;
-			BYTE b2 = buffer[i];
+			uint8_t b1 = buffer[i++] & 0x7F;
+			uint8_t b2 = buffer[i];
 
 			if (b1 & 0x01)
 				decKey = 128 + b2;

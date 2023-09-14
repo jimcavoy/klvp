@@ -4,3 +4,4 @@ out/build/x64-debug/_deps/gsl-src/
 .vs/
 CMakePresets.json
 out/
+build/

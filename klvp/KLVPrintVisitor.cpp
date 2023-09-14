@@ -7,6 +7,9 @@
 #include <iostream>
 #ifdef WIN32
 #include <WinSock2.h>
+#else
+#include <netinet/in.h>
+#define sprintf_s sprintf
 #endif
 
 using namespace std;
@@ -138,19 +141,29 @@ void KLVPrintVisitor::Visit(lcss::KLVChecksum& klv)
 
 void KLVPrintVisitor::Visit(lcss::KLVUNIXTimeStamp& klv)
 {
+#ifdef WIN32
 	struct tm st;
-	uint8_t value[8];
+#else
+	struct tm* st;
+#endif
+	uint8_t value[8]{};
 	klv.value(value);
-	char timebuf[BUFSIZ];
+	char timebuf[BUFSIZ]{};
 	klv.Accept(_decoder);
+	char szTime[BUFSIZ]{};
 
 	int usec = _decoder.tmValue % 1000000; // microseconds
 	time_t time = (time_t)_decoder.tmValue / 1e6; // seconds
-
+	
+#ifdef WIN32
 	gmtime_s(&st, &time);
-	char szTime[BUFSIZ];
 	strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", &st);
 	_snprintf_s(timebuf, BUFSIZ, "%s.%06ld UTC", szTime, usec);
+#else
+	st = gmtime(&time);
+	strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", st);
+	sprintf(timebuf,"%s.%06ld UTC", szTime, usec);
+#endif
 	const char* classname = typeid(klv).name() + 12;
 	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << timebuf << "</" << classname << ">" << endl;
 }
@@ -511,19 +524,29 @@ void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformHeading& klv)
 
 void KLVPrintVisitor::Visit(lcss::KLVEventStartTimeUTC& klv)
 {
+#ifdef WIN32
 	struct tm st;
-	uint8_t value[8];
+#else
+	struct tm* st;
+#endif
+	uint8_t value[8]{};
 	klv.value(value);
-	char timebuf[BUFSIZ];
+	char timebuf[BUFSIZ]{};
 	klv.Accept(_decoder);
+	char szTime[BUFSIZ]{};
 
 	int usec = _decoder.tmValue % 1000000; // microseconds
 	time_t time = (time_t)_decoder.tmValue / 1e6; // seconds
 
+#ifdef WIN32
 	gmtime_s(&st, &time);
-	char szTime[BUFSIZ];
 	strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", &st);
 	_snprintf_s(timebuf, BUFSIZ, "%s.%06ld UTC", szTime, usec);
+#else
+	st = gmtime(&time);
+	strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", st);
+	sprintf(timebuf,"%s.%06ld UTC", szTime, usec);
+#endif
 	const char* classname = typeid(klv).name() + 12;
 	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << timebuf << "</" << classname << ">" << endl;
 }
@@ -830,11 +853,12 @@ void KLVPrintVisitor::Visit(lcss::KLVAirbaseLocations& klv)
 
 void KLVPrintVisitor::Visit(lcss::KLVTakeoffTime& klv)
 {
+#ifdef WIN32
 	std::string strValue;
-	uint8_t value[8];
+	uint8_t value[8]{};
 	klv.value(value);
-	char timebuf[26];
-	__int64 lVal;
+	char timebuf[26]{};
+	int64_t lVal;
 	memcpy(&lVal, value, 8);
 	__time64_t time = ntohll(lVal);
 	int n = time % 1000000;
@@ -858,6 +882,9 @@ void KLVPrintVisitor::Visit(lcss::KLVTakeoffTime& klv)
 	}
 	const char* classname = typeid(klv).name() + 12;
 	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << strValue.c_str() << "</" << classname << ">" << endl;
+#else
+	printNotImplemented(klv);
+#endif
 }
 
 void KLVPrintVisitor::Visit(lcss::KLVTransmissionFrequency& klv)

@@ -2,6 +2,8 @@
 #include "klvelmtimpl.h"
 #include "klvuselmtimpl.h"
 #include "decode.h"
+
+#include <memory.h>
 // klvlex generated on Tue Jan 12 07:41:50 2021
 
 int lcss::KLVElement::parse(uint8_t* buf, int size)
