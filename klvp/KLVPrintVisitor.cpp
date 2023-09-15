@@ -7,15 +7,28 @@
 #include <iostream>
 #ifdef WIN32
 #include <WinSock2.h>
+#define OFFSET 12
 #else
 #include <netinet/in.h>
 #define sprintf_s sprintf
+#define OFFSET 8
 #endif
 
 using namespace std;
 
 namespace
 {
+	std::string className(const lcss::KLVElementImpl& klv)
+	{
+		std::string str(typeid(klv).name() + OFFSET);
+#ifdef WIN32
+		return str;
+#else
+		string str2 = str.substr(0, str.length()-1);
+		return str2;
+#endif
+	}
+
 	void printString(const char* classname, int key, const uint8_t* buf, uint16_t bufsize)
 	{
 		cout << "\t\t<" << classname << " key=\"" << key << "\">";
@@ -23,7 +36,7 @@ namespace
 		{
 			if (isprint(buf[i]))
 				cout << (char)buf[i];
-			else if (buf[i] != NULL)
+			else if (buf[i] != 0)
 				cout << hex << buf[i] << dec;
 		}
 		cout << "</" << classname << ">" << endl;
@@ -34,26 +47,26 @@ namespace
 		uint8_t buf[128];
 		memset(buf, 0, 128);
 		klv.value(buf);
-		printString(typeid(klv).name() + 12, klv.key(), buf, klv.length());
+		printString(className(klv).c_str(), klv.key(), buf, klv.length());
 	}
 
 	void printFloatElement(lcss::KLVElementImpl& klv, lcss::KLVDecodeVisitor& decoder)
 	{
 		klv.Accept(decoder);
-		const char* classname = typeid(klv).name() + 12;
+		std::string classname = className(klv);
 		cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << decoder.fValue << "</" << classname << ">" << endl;
 	}
 
 	void printIntElement(lcss::KLVElementImpl& klv, lcss::KLVDecodeVisitor& decoder)
 	{
 		klv.Accept(decoder);
-		const char* classname = typeid(klv).name() + 12;
+		std::string classname = className(klv);
 		cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << decoder.nValue << "</" << classname << ">" << endl;
 	}
 
 	void printNotImplemented(lcss::KLVElementImpl& klv)
 	{
-		const char* classname = typeid(klv).name() + 12;
+		std::string classname = className(klv);
 		cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">Not Implmented</" << classname << ">" << endl;
 	}
 
@@ -135,7 +148,7 @@ void KLVPrintVisitor::Visit(lcss::KLVChecksum& klv)
 	char crc[16];
 	sprintf_s(crc, "%#4.2x %#4.2x", val[0], val[1]);
 
-	const char* classname = typeid(klv).name() + 12;
+	std::string classname = className(klv);
 	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << crc << "</" << classname << ">" << endl;
 }
 
@@ -162,9 +175,9 @@ void KLVPrintVisitor::Visit(lcss::KLVUNIXTimeStamp& klv)
 #else
 	st = gmtime(&time);
 	strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", st);
-	sprintf(timebuf,"%s.%06ld UTC", szTime, usec);
+	sprintf(timebuf,"%s.%06d UTC", szTime, usec);
 #endif
-	const char* classname = typeid(klv).name() + 12;
+	std::string classname = className(klv);
 	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << timebuf << "</" << classname << ">" << endl;
 }
 
@@ -545,9 +558,9 @@ void KLVPrintVisitor::Visit(lcss::KLVEventStartTimeUTC& klv)
 #else
 	st = gmtime(&time);
 	strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", st);
-	sprintf(timebuf,"%s.%06ld UTC", szTime, usec);
+	sprintf(timebuf,"%s.%06d UTC", szTime, usec);
 #endif
-	const char* classname = typeid(klv).name() + 12;
+	std::string classname = className(klv);
 	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << timebuf << "</" << classname << ">" << endl;
 }
 
@@ -667,7 +680,7 @@ void KLVPrintVisitor::Visit(lcss::KLVMIISCoreIdentifier& klv)
 		value[8], value[9], value[10], value[11], value[12], value[13], value[14],
 		value[15], value[16], value[17]);
 
-	const char* classname = typeid(klv).name() + 12;
+	std::string classname = className(klv);
 	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << uuid << "</" << classname << ">" << endl;
 }
 
@@ -880,7 +893,7 @@ void KLVPrintVisitor::Visit(lcss::KLVTakeoffTime& klv)
 		strValue += num;
 		strValue += " ms)";
 	}
-	const char* classname = typeid(klv).name() + 12;
+	std::string classname = className(klv);
 	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << strValue.c_str() << "</" << classname << ">" << endl;
 #else
 	printNotImplemented(klv);
