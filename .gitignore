@@ -2,6 +2,7 @@
 out/build/x64-debug/_deps/gsl-src/
 *.db
 .vs/
+.vscode/
 CMakePresets.json
 out/
 build/
