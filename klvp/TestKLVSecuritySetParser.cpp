@@ -17,7 +17,7 @@ TestKLVSecuritySetParser::~TestKLVSecuritySetParser(void)
 {
 }
 
-void TestKLVSecuritySetParser::onBeginSet(int len, lcss::KLVParser::TYPE type)
+void TestKLVSecuritySetParser::onBeginSet(int len, lcss::TYPE type)
 {
 	lcss::KLVParser::onBeginSet(len, type);
 	std::cout << "\t\t<LDS_Security_Set length=\"" << len  << "\">" << endl;

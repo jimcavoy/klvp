@@ -49,11 +49,20 @@ public:
 	/// Retrieve KLV element's key in the serialized BER-OID form.
 	/// </summary>
 	/// <param name="key">The buffer to hold the serialized bytes</param>
-	/// <returns>The number of bytes to hold the key. If input paramater is null
+	/// <returns>The number of bytes to hold the key. If input parameter is null
 	/// return the number of bytes without filling input parameter.</returns>
 	int key(uint8_t* key) const;
 
 	int length() const;
+
+	/// <summary>
+	/// Returns the number of bytes used to encode the length field
+	/// using BER encoding.
+	/// Ref: MISB ST 0107.3, Section 6.3.2, 1 November 2018
+	/// </summary>
+	/// <returns>Number of bytes used to BER encoded the length; otherwise,
+	///  return 0 for error.</returns>
+	int numOfBytesForLength() const;
 
 	void value(uint8_t*) const;
 	uint8_t* value();

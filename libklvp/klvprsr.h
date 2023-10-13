@@ -4,6 +4,7 @@
 #include "klvelmt.h"
 
 #include <vector>
+#include <memory>
 #include <gsl/gsl>
 
 namespace lcss
@@ -11,26 +12,19 @@ namespace lcss
 	extern const uint8_t LocalSetKey[16];
 	extern const uint8_t UniversalMetadataSetKey[16];
 	extern const uint8_t SecurityMetadataUniversalSetKey[16];
+
+	enum class TYPE : int {
+		LOCAL_SET,
+		UNIVERSAL_SET,
+		SECURITY_UNIVERSAL_SET,
+		UNIVERSAL_ELEMENT,
+		UNKNOWN
+	};
+
 /////////////////////////////////////////////////////////////////////////////
 // KLVParser
 	class KLVParser
-	{
-	protected:
-		enum class STATE : int {
-			START_SET_KEY,
-			START_SET_LEN_FLAG,
-			START_SET_LEN,
-			LEXING,
-			PARSING
-		};
-
-		enum class TYPE : int {
-			LOCAL_SET,
-			UNIVERSAL_SET,
-			SECURITY_UNIVERSAL_SET,
-			UNIVERSAL_ELEMENT,
-			UNKNOWN
-		};
+	{	
 	public:
 		KLVParser();
 		virtual ~KLVParser();
@@ -43,24 +37,12 @@ namespace lcss
 
 		virtual void onError(const char* errmsg, int pos);
 
-		bool isValidating() const noexcept { return validateChecksum_;}
-		void validateChecksum(bool val) noexcept { validateChecksum_ = val; }
+		bool isValidating() const noexcept;
+		void validateChecksum(bool val) noexcept;
 
 	protected:
-		void onEndKey(TYPE type);
-		void onEndSetKey();
-		void onEndLenFlag();
-		void onBegin(int len);
-
-	protected:
-		STATE				state_;
-		TYPE				type_;
-		std::vector<uint8_t>	pbuffer_;
-		int					setsize_;
-
-		bool validateChecksum_;
-		std::vector<uint8_t>	sodb_;  // sequence of data bytes
-		lcss::KLVElement	checksumElement_;
+		class Impl;
+		std::unique_ptr<Impl> _pimpl;
 	};
 
 /////////////////////////////////////////////////////////////////////////////
@@ -77,5 +59,20 @@ namespace lcss
 		virtual void parse( const gsl::span<uint8_t> buffer);
 	};
 }
+
+// Template function to calculate checksum
+// Ref: MISB ST 0601.14a, 1 May 2020, page 31
+template<typename T>
+unsigned short bcc_16(T first, T last)
+{
+	// Initialize Checksum and counter variables.
+	unsigned short bcc = 0;
+	unsigned short i = 0;
+	T it;
+	// Sum each 16-bit chunk within the buffer into a checksum
+	for (it = first; it != last; ++it, i++)
+		bcc += *it << (8 * ((i + 1) % 2));
+	return bcc;
+} // end of bcc_16 ()
 
 #endif

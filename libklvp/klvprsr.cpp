@@ -54,30 +54,76 @@ namespace
 
 		return vis.flag_;
 	}
+}
 
-	// Ref: MISB ST 0601.8, 23 October 14, page 12
-	template<typename T>
-	unsigned short bcc_16(T first, T last)
+/////////////////////////////////////////////////////////////////////////////
+// KLVParser::Impl
+
+namespace lcss
+{
+	class KLVParser::Impl
 	{
-		// Initialize Checksum and counter variables.
-		unsigned short bcc = 0;
-		unsigned short i = 0;
-		T it;
-		// Sum each 16-bit chunk within the buffer into a checksum
-		for (it = first; it != last; ++it, i++)
-			bcc += *it << (8 * ((i + 1) % 2));
-		return bcc;
-	} // end of bcc_16 ()
+	public:
+		enum class STATE : int {
+			START_SET_KEY,
+			START_SET_LEN_FLAG,
+			START_SET_LEN,
+			LEXING,
+			PARSING
+		};
+
+	public:
+		void onEndKey(TYPE type);
+		void onEndSetKey();
+		void onEndLenFlag();
+		void onBegin(KLVParser& parser, int len);
+
+	public:
+		STATE					state_{lcss::KLVParser::Impl::STATE::START_SET_KEY};
+		TYPE					type_{lcss::TYPE::UNKNOWN};
+		std::vector<uint8_t>	pbuffer_;
+		int						setsize_{ 0 };
+
+		bool					validateChecksum_{ false };
+		std::vector<uint8_t>	sodb_;  // sequence of data bytes
+		lcss::KLVElement		checksumElement_;
+	};
+
+	void KLVParser::Impl::onEndKey(TYPE type)
+	{
+		type_ = type;
+		onEndSetKey();
+	}
+
+	void KLVParser::Impl::onEndSetKey()
+	{
+		state_ = lcss::KLVParser::Impl::STATE::START_SET_LEN_FLAG;
+		pbuffer_.clear();
+	}
+
+	void KLVParser::Impl::onEndLenFlag()
+	{
+		state_ = lcss::KLVParser::Impl::STATE::START_SET_LEN;
+		pbuffer_.clear();
+	}
+
+	void KLVParser::Impl::onBegin(KLVParser& parser, int len)
+	{
+		switch (type_)
+		{
+		case TYPE::LOCAL_SET: parser.onBeginSet(len, type_); break;
+		case TYPE::UNIVERSAL_SET: parser.onBeginSet(len, type_); break;
+		case TYPE::SECURITY_UNIVERSAL_SET: parser.onBeginSet(len, type_); break;
+		case TYPE::UNIVERSAL_ELEMENT: parser.onBeginSet(len, type_); break;
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // KLVParser
 
 lcss::KLVParser::KLVParser()
-	:state_(lcss::KLVParser::STATE::START_SET_KEY)
-	, setsize_(0)
-	, validateChecksum_(false)
-	, type_(TYPE::UNKNOWN)
+	: _pimpl(std::make_unique<lcss::KLVParser::Impl>())
 {
 
 }
@@ -135,30 +181,30 @@ void lcss::KLVParser::parse(const gsl::span<const uint8_t> buffer)
 {
 	for (const uint8_t& b : buffer)
 	{
-		if (state_ == lcss::KLVParser::STATE::START_SET_KEY)
+		if (_pimpl->state_ == lcss::KLVParser::Impl::STATE::START_SET_KEY)
 		{
-			pbuffer_.push_back(b);
-			if (pbuffer_.size() == 16)
+			_pimpl->pbuffer_.push_back(b);
+			if (_pimpl->pbuffer_.size() == 16)
 			{
-				if (std::equal(pbuffer_.begin(), pbuffer_.end(), LocalSetKey))
+				if (std::equal(_pimpl->pbuffer_.begin(), _pimpl->pbuffer_.end(), LocalSetKey))
 				{
-					sodb_.insert(sodb_.begin(), pbuffer_.begin(), pbuffer_.end());
-					onEndKey(TYPE::LOCAL_SET);
+					_pimpl->sodb_.insert(_pimpl->sodb_.begin(), _pimpl->pbuffer_.begin(), _pimpl->pbuffer_.end());
+					_pimpl->onEndKey(TYPE::LOCAL_SET);
 				}
-				else if (std::equal(pbuffer_.begin(), pbuffer_.end(), UniversalMetadataSetKey))
+				else if (std::equal(_pimpl->pbuffer_.begin(), _pimpl->pbuffer_.end(), UniversalMetadataSetKey))
 				{
-					sodb_.insert(sodb_.begin(), pbuffer_.begin(), pbuffer_.end());
-					onEndKey(TYPE::UNIVERSAL_SET);
+					_pimpl->sodb_.insert(_pimpl->sodb_.begin(), _pimpl->pbuffer_.begin(), _pimpl->pbuffer_.end());
+					_pimpl->onEndKey(TYPE::UNIVERSAL_SET);
 				}
-				else if (std::equal(pbuffer_.begin(), pbuffer_.end(), SecurityMetadataUniversalSetKey))
+				else if (std::equal(_pimpl->pbuffer_.begin(), _pimpl->pbuffer_.end(), SecurityMetadataUniversalSetKey))
 				{
-					sodb_.insert(sodb_.begin(), pbuffer_.begin(), pbuffer_.end());
-					onEndKey(TYPE::SECURITY_UNIVERSAL_SET);
+					_pimpl->sodb_.insert(_pimpl->sodb_.begin(), _pimpl->pbuffer_.begin(), _pimpl->pbuffer_.end());
+					_pimpl->onEndKey(TYPE::SECURITY_UNIVERSAL_SET);
 				}
-				else if (std::equal(pbuffer_.begin(), pbuffer_.begin() + 4, UniversalMetadataElementKey))
+				else if (std::equal(_pimpl->pbuffer_.begin(), _pimpl->pbuffer_.begin() + 4, UniversalMetadataElementKey))
 				{
-					sodb_.insert(sodb_.begin(), pbuffer_.begin(), pbuffer_.end());
-					onEndKey(TYPE::UNIVERSAL_ELEMENT);
+					_pimpl->sodb_.insert(_pimpl->sodb_.begin(), _pimpl->pbuffer_.begin(), _pimpl->pbuffer_.end());
+					_pimpl->onEndKey(TYPE::UNIVERSAL_ELEMENT);
 				}
 				else
 				{
@@ -167,62 +213,62 @@ void lcss::KLVParser::parse(const gsl::span<const uint8_t> buffer)
 				}
 			}
 		}
-		else if (state_ == lcss::KLVParser::STATE::START_SET_LEN_FLAG)
+		else if (_pimpl->state_ == lcss::KLVParser::Impl::STATE::START_SET_LEN_FLAG)
 		{
-			onEndLenFlag();
+			_pimpl->onEndLenFlag();
 			// handle boundry case when length bytes cross over two input buf arguments
-			pbuffer_.push_back(b);
+			_pimpl->pbuffer_.push_back(b);
 		}
-		else if (state_ == lcss::KLVParser::STATE::START_SET_LEN)
+		else if (_pimpl->state_ == lcss::KLVParser::Impl::STATE::START_SET_LEN)
 		{
-			const int lenFlag = getLenFlag(pbuffer_[0]);
+			const int lenFlag = getLenFlag(_pimpl->pbuffer_[0]);
 			int setsz = 0;
 			if (lenFlag == 0)
 			{
-				setsz = pbuffer_[0];
-				sodb_.push_back(pbuffer_[0]);
-				onBegin(setsz);
+				setsz = _pimpl->pbuffer_[0];
+				_pimpl->sodb_.push_back(_pimpl->pbuffer_[0]);
+				_pimpl->onBegin(*this, setsz);
 			}
-			else if (pbuffer_.size() == lenFlag + 1)
+			else if (_pimpl->pbuffer_.size() == lenFlag + 1)
 			{
 				uint8_t lengthFlag = lenFlag | 0x80;
-				sodb_.push_back(lengthFlag);
-				auto first = pbuffer_.begin();
+				_pimpl->sodb_.push_back(lengthFlag);
+				auto first = _pimpl->pbuffer_.begin();
 				++first; // skip over the length flag
-				sodb_.insert(sodb_.end(), first, pbuffer_.end());
-				setsz = getKLVSetSize(pbuffer_.data() + 1, lenFlag);
-				onBegin(setsz);
+				_pimpl->sodb_.insert(_pimpl->sodb_.end(), first, _pimpl->pbuffer_.end());
+				setsz = getKLVSetSize(_pimpl->pbuffer_.data() + 1, lenFlag);
+				_pimpl->onBegin(*this, setsz);
 			}
 			else
-				pbuffer_.push_back(b);
+				_pimpl->pbuffer_.push_back(b);
 		}
 
-		if (state_ == lcss::KLVParser::STATE::LEXING)
+		if (_pimpl->state_ == lcss::KLVParser::Impl::STATE::LEXING)
 		{
-			pbuffer_.push_back(b);
-			sodb_.push_back(b);
-			if (pbuffer_.size() == setsize_)
+			_pimpl->pbuffer_.push_back(b);
+			_pimpl->sodb_.push_back(b);
+			if (_pimpl->pbuffer_.size() == _pimpl->setsize_)
 			{
-				state_ = lcss::KLVParser::STATE::PARSING;
+				_pimpl->state_ = lcss::KLVParser::Impl::STATE::PARSING;
 			}
 		}
 
-		if (state_ == lcss::KLVParser::STATE::PARSING)
+		if (_pimpl->state_ == lcss::KLVParser::Impl::STATE::PARSING)
 		{
 			int n = 0;
-			while (n < setsize_)
+			while (n < _pimpl->setsize_)
 			{
 				KLVElement klv;
-				if (type_ == TYPE::LOCAL_SET)
+				if (_pimpl->type_ == TYPE::LOCAL_SET)
 				{
-					n += klv.parse(pbuffer_.data() + n, setsize_);
+					n += klv.parse(_pimpl->pbuffer_.data() + n, _pimpl->setsize_);
 				}
 				else
 				{
-					if (type_ == TYPE::UNIVERSAL_ELEMENT)
-						n += klv.parseUniversalSetElement(sodb_.data() + n, setsize_);
+					if (_pimpl->type_ == TYPE::UNIVERSAL_ELEMENT)
+						n += klv.parseUniversalSetElement(_pimpl->sodb_.data() + n, _pimpl->setsize_);
 					else
-						n += klv.parseUniversalSetElement(pbuffer_.data() + n, setsize_);
+						n += klv.parseUniversalSetElement(_pimpl->pbuffer_.data() + n, _pimpl->setsize_);
 				}
 				onElement(klv);
 			}
@@ -231,57 +277,27 @@ void lcss::KLVParser::parse(const gsl::span<const uint8_t> buffer)
 	}
 }
 
-void lcss::KLVParser::onEndKey(TYPE type)
-{
-	type_ = type;
-	onEndSetKey();
-}
-
-void lcss::KLVParser::onBegin(int len)
-{
-	switch (type_)
-	{
-	case TYPE::LOCAL_SET: onBeginSet(len, type_); break;
-	case TYPE::UNIVERSAL_SET: onBeginSet(len, type_); break;
-	case TYPE::SECURITY_UNIVERSAL_SET: onBeginSet(len, type_); break;
-	case TYPE::UNIVERSAL_ELEMENT: onBeginSet(len, type_); break;
-	}
-}
-
-
-void lcss::KLVParser::onEndSetKey()
-{
-	state_ = lcss::KLVParser::STATE::START_SET_LEN_FLAG;
-	pbuffer_.clear();
-}
-
-void lcss::KLVParser::onEndLenFlag()
-{
-	state_ = lcss::KLVParser::STATE::START_SET_LEN;
-	pbuffer_.clear();
-}
-
 void lcss::KLVParser::onBeginSet(int len, TYPE type)
 {
-	setsize_ = len;
-	state_ = lcss::KLVParser::STATE::LEXING;
-	pbuffer_.clear();
+	_pimpl->setsize_ = len;
+	_pimpl->state_ = lcss::KLVParser::Impl::STATE::LEXING;
+	_pimpl->pbuffer_.clear();
 }
 
 void lcss::KLVParser::onElement(lcss::KLVElement& klv)
 {
 	if (klv.key() == 1)
-		checksumElement_ = klv;
+		_pimpl->checksumElement_ = klv;
 }
 
 void lcss::KLVParser::onEndSet()
 {
-	state_ = lcss::KLVParser::STATE::START_SET_KEY;
-	setsize_ = 0;
-	pbuffer_.clear();
-	if (validateChecksum_ && type_ == TYPE::LOCAL_SET)
+	_pimpl->state_ = lcss::KLVParser::Impl::STATE::START_SET_KEY;
+	_pimpl->setsize_ = 0;
+	_pimpl->pbuffer_.clear();
+	if (isValidating() && _pimpl->type_ == TYPE::LOCAL_SET)
 	{
-		if (checksumElement_.key() != 1)
+		if (_pimpl->checksumElement_.key() != 1)
 		{
 			onError("Invalid Checksum", 0);
 		}
@@ -289,24 +305,34 @@ void lcss::KLVParser::onEndSet()
 		{
 			uint8_t val[2]{};
 			unsigned short cs = 0;
-			checksumElement_.value(val);
+			_pimpl->checksumElement_.value(val);
 			memcpy(&cs, val, 2);
 			unsigned short localCs = ntohs(cs);
-			if (!(bcc_16(sodb_.begin(), sodb_.end() - 2)) == localCs)
+			if (!(bcc_16(_pimpl->sodb_.begin(), _pimpl->sodb_.end() - 2)) == localCs)
 			{
 				onError("Invalid Checksum", 0);
 			}
 		}
 	}
-	sodb_.clear();
+	_pimpl->sodb_.clear();
 }
 
 void lcss::KLVParser::onError(const char* errmsg, int pos)
 {
-	state_ = lcss::KLVParser::STATE::START_SET_KEY;
-	setsize_ = 0;
-	pbuffer_.clear();
-	sodb_.clear();
+	_pimpl->state_ = lcss::KLVParser::Impl::STATE::START_SET_KEY;
+	_pimpl->setsize_ = 0;
+	_pimpl->pbuffer_.clear();
+	_pimpl->sodb_.clear();
+}
+
+bool lcss::KLVParser::isValidating() const noexcept
+{
+	return _pimpl->validateChecksum_;
+}
+
+void lcss::KLVParser::validateChecksum(bool val) noexcept
+{
+	_pimpl->validateChecksum_ = val;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -330,62 +356,62 @@ void lcss::KLVSecuritySetParser::parse(const gsl::span<uint8_t> buffer)
 {
 	for (const uint8_t& b : buffer)
 	{
-		if (state_ == lcss::KLVParser::STATE::START_SET_KEY)
+		if (_pimpl->state_ == lcss::KLVParser::Impl::STATE::START_SET_KEY)
 		{
 			if (b != 0x30)
 				return;
 			else {
-				sodb_.push_back(0x30);
-				onEndKey(TYPE::LOCAL_SET);
+				_pimpl->sodb_.push_back(0x30);
+				_pimpl->onEndKey(TYPE::LOCAL_SET);
 			}
 		}
-		else if (state_ == lcss::KLVParser::STATE::START_SET_LEN_FLAG)
+		else if (_pimpl->state_ == lcss::KLVParser::Impl::STATE::START_SET_LEN_FLAG)
 		{
-			onEndLenFlag();
+			_pimpl->onEndLenFlag();
 			// handle boundry case when length bytes cross over two input buf arguments
-			pbuffer_.push_back(b);
+			_pimpl->pbuffer_.push_back(b);
 		}
-		else if (state_ == lcss::KLVParser::STATE::START_SET_LEN)
+		else if (_pimpl->state_ == lcss::KLVParser::Impl::STATE::START_SET_LEN)
 		{
-			const int lenFlag = getLenFlag(pbuffer_[0]);
+			const int lenFlag = getLenFlag(_pimpl->pbuffer_[0]);
 			int setsz = 0;
 			if (lenFlag == 0)
 			{
-				setsz = pbuffer_[0];
-				sodb_.push_back(pbuffer_[0]);
+				setsz = _pimpl->pbuffer_[0];
+				_pimpl->sodb_.push_back(_pimpl->pbuffer_[0]);
 				onBeginSet(setsz, TYPE::LOCAL_SET);
 			}
-			else if (pbuffer_.size() == lenFlag + 1)
+			else if (_pimpl->pbuffer_.size() == lenFlag + 1)
 			{
 				uint8_t lengthFlag = lenFlag | 0x80;
-				sodb_.push_back(lengthFlag);
-				auto first = pbuffer_.begin();
+				_pimpl->sodb_.push_back(lengthFlag);
+				auto first = _pimpl->pbuffer_.begin();
 				++first; // skip over the length flag
-				sodb_.insert(sodb_.end(), first, pbuffer_.end());
-				setsz = getKLVSetSize(pbuffer_.data() + 1, lenFlag);
+				_pimpl->sodb_.insert(_pimpl->sodb_.end(), first, _pimpl->pbuffer_.end());
+				setsz = getKLVSetSize(_pimpl->pbuffer_.data() + 1, lenFlag);
 				onBeginSet(setsz, TYPE::LOCAL_SET);
 			}
 			else
-				pbuffer_.push_back(b);
+				_pimpl->pbuffer_.push_back(b);
 		}
 
-		if (state_ == lcss::KLVParser::STATE::LEXING)
+		if (_pimpl->state_ == lcss::KLVParser::Impl::STATE::LEXING)
 		{
-			pbuffer_.push_back(b);
-			sodb_.push_back(b);
-			if (pbuffer_.size() == setsize_)
+			_pimpl->pbuffer_.push_back(b);
+			_pimpl->sodb_.push_back(b);
+			if (_pimpl->pbuffer_.size() == _pimpl->setsize_)
 			{
-				state_ = lcss::KLVParser::STATE::PARSING;
+				_pimpl->state_ = lcss::KLVParser::Impl::STATE::PARSING;
 			}
 		}
 
-		if (state_ == lcss::KLVParser::STATE::PARSING)
+		if (_pimpl->state_ == lcss::KLVParser::Impl::STATE::PARSING)
 		{
 			int n = 0;
-			while (n < setsize_)
+			while (n < _pimpl->setsize_)
 			{
 				KLVElement klv;
-				n += klv.parseSecuritySetElement(pbuffer_.data() + n, setsize_);
+				n += klv.parseSecuritySetElement(_pimpl->pbuffer_.data() + n, _pimpl->setsize_);
 				onElement(klv);
 			}
 			onEndSet();

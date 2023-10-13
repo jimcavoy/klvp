@@ -232,6 +232,21 @@ int lcss::KLVElement::length() const
 	return 0;
 }
 
+int lcss::KLVElement::numOfBytesForLength() const
+{
+	if (pimpl_.get() != nullptr)
+	{
+		int sz = pimpl_->length();
+		if (sz < 0x7F)
+			return 1;
+		else if (sz > 0x7F && sz < 0x0100)
+			return 2;
+		else
+			return 3;
+	}
+	return 0;
+}
+
 void lcss::KLVElement::value(uint8_t* buf) const
 {
 	if (pimpl_.get() != nullptr)
