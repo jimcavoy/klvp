@@ -10,6 +10,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if (WIN32)
     set(CMAKE_INSTALL_LIBDIR $ENV{APPDATA})
+	include_directories($ENV{ProgramFiles}/sqlite3/include)
+else()
+	include_directories(../../sqlite3-cmake/libs/include)
 endif()
 
 file(GLOB SRC_LIST
@@ -17,8 +20,6 @@ file(GLOB SRC_LIST
     *.cpp)
 add_library(LibLdsDB STATIC ${SRC_LIST})
 set_property(TARGET LibLdsDB PROPERTY POSITION_INDEPENDENT_CODE ON)
-
-include_directories(../../sqlite3-cmake/libs/include)
 
 target_include_directories(LibLdsDB
           PUBLIC 

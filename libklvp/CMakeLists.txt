@@ -22,13 +22,13 @@ FetchContent_Declare(GSL
 
 FetchContent_MakeAvailable(GSL)
 
+include_directories(../../loki-lib/include)
+
 file(GLOB SRC_LIST
     *.h
     *.cpp)
 add_library(libklvp STATIC ${SRC_LIST})
 set_property(TARGET libklvp PROPERTY POSITION_INDEPENDENT_CODE ON)
-
-include_directories(../../loki-lib/include)
 
 if(WIN32)    
     target_link_libraries(libklvp PRIVATE Microsoft.GSL::GSL wsock32 ws2_32)
