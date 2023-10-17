@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.14)
 project("libklvp"
     VERSION 1.0 
-    DESCRIPTION "STANAG 4609 KLV parser library"
+    DESCRIPTION "STANAG 4609 ST 0601 KLV parser library"
     LANGUAGES C CXX)
 
 # specify the C++ standard

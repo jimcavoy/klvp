@@ -236,13 +236,7 @@ int lcss::KLVElement::numOfBytesForLength() const
 {
 	if (pimpl_.get() != nullptr)
 	{
-		int sz = pimpl_->length();
-		if (sz < 0x7F)
-			return 1;
-		else if (sz > 0x7F && sz < 0x0100)
-			return 2;
-		else
-			return 3;
+		pimpl_->numOfBytesForLength();
 	}
 	return 0;
 }
