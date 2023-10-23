@@ -1,6 +1,30 @@
 #include "util.h"
 
+#ifdef _WIN32
+#include <WinSock2.h>
+#endif
+
+#include "KlvSizeVisitor.h"
+#include "RawSerializedVisitor.h"
+#include "treenode.h"
+
 #include <cstdint>
+
+
+#define TreeNodePtr TreeNode<lcss::KLVElement>*
+
+namespace
+{
+	void setChecksum(std::vector<uint8_t>& rawByteSeq, uint16_t bcc)
+	{
+		uint8_t val[2];
+		bcc = htons(bcc);
+		memcpy(val, &bcc, 2);
+
+		rawByteSeq[rawByteSeq.size() - 2] = val[0];
+		rawByteSeq[rawByteSeq.size() - 1] = val[1];
+	}
+}
 
 const uint8_t lcss::LocalSetKey[] = { 0x06,0x0E,0x2B,0x34,
 	0x02,0x0B,0x01,0x01,
@@ -30,4 +54,26 @@ bool lcss::isLDSGroup(unsigned char key[], int len)
 			return false;
 	}
 	return true;
+}
+
+std::vector<unsigned char> lcss::serializeKlvSet(TreeNodePtr root)
+{
+	std::vector<uint8_t> rawByteSeq;
+
+	KlvSizeVisitor sizeVis;
+	auto sizeLamda = [&sizeVis](TreeNodePtr node) { node->getData().Accept(sizeVis); };
+	postorderTreeWalk(root, &sizeLamda);
+
+	// Serialize the tree instance out to a vector
+	RawSerializeVisitor rawSerialVis(rawByteSeq);
+	auto serializeLamda = [&rawSerialVis](TreeNodePtr node) { node->getData().Accept(rawSerialVis); };
+	preorderTreeWalk(root, &serializeLamda);
+
+	// Calculated the checksum
+	uint16_t bcc = lcss::bcc_16(rawByteSeq.begin(), rawByteSeq.end() - 2);
+
+	// Set checksum
+	setChecksum(rawByteSeq, bcc);
+
+	return rawByteSeq;
 }

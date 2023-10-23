@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vector>
+#include "treenode.h"
+#include "klvelmt.h"
+
 namespace lcss
 {
 	extern const unsigned char LocalSetKey[16];
@@ -22,4 +26,6 @@ namespace lcss
 	} // end of bcc_16 ()
 
 	bool isLDSGroup(unsigned char key[], int len);
+
+	std::vector<unsigned char> serializeKlvSet(TreeNode<lcss::KLVElement>* root);
 }

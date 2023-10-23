@@ -26,6 +26,10 @@ public:
 	{
 	}
 
+	virtual ~RawSerializeVisitor()
+	{
+	}
+
 	void Visit(lcss::UniversalMetadataElement& item) override
 	{
 		uint8_t key[16];
@@ -92,7 +96,7 @@ private:
 		{
 			uint8_t c = 0x82;
 			_archive.push_back(c);
-			UINT16 sz = htons(len);
+			uint16_t sz = htons(len);
 			uint8_t s[2];
 			memcpy(s, (void*)&sz, 2);
 			_archive.push_back(s[0]);
