@@ -102,7 +102,7 @@ void preorderTreeWalk(T node, P p)
 {
 	if (node != nullptr)
 	{
-		(*p)(node);
+		p(node);
 		preorderTreeWalk(node->child(), p);
 		preorderTreeWalk(node->sibling(), p);
 	}
@@ -115,6 +115,6 @@ void postorderTreeWalk(T node, P p)
 	{
 		postorderTreeWalk(node->child(), p);
 		postorderTreeWalk(node->sibling(), p);
-		(*p)(node);
+		p(node);
 	}
 }

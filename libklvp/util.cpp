@@ -62,12 +62,12 @@ std::vector<unsigned char> lcss::serializeKlvSet(TreeNodePtr root)
 
 	KlvSizeVisitor sizeVis;
 	auto sizeLamda = [&sizeVis](TreeNodePtr node) { node->getData().Accept(sizeVis); };
-	postorderTreeWalk(root, &sizeLamda);
+	postorderTreeWalk(root, sizeLamda);
 
 	// Serialize the tree instance out to a vector
 	RawSerializeVisitor rawSerialVis(rawByteSeq);
 	auto serializeLamda = [&rawSerialVis](TreeNodePtr node) { node->getData().Accept(rawSerialVis); };
-	preorderTreeWalk(root, &serializeLamda);
+	preorderTreeWalk(root, serializeLamda);
 
 	// Calculated the checksum
 	uint16_t bcc = lcss::bcc_16(rawByteSeq.begin(), rawByteSeq.end() - 2);
