@@ -1,6 +1,7 @@
 #include "klvprsr.h"
 
 #include "klvelmtimpl.h"
+#include "util.h"
 
 #include <cstdint>
 #ifdef WIN32
@@ -9,52 +10,10 @@
 #include <netinet/in.h>
 #endif
 
-uint64_t ntohll ( uint64_t Value );
-uint64_t htonll ( uint64_t Value );
-
-const uint8_t lcss::LocalSetKey[] = { 0x06,0x0E,0x2B,0x34,
-	0x02,0x0B,0x01,0x01,
-	0x0E,0x01,0x03,0x01,
-	0x01,0x00,0x00,0x00 };
-
-const uint8_t lcss::SecurityMetadataUniversalSetKey[] = { 0x06,0x0E,0x2B,0x34,
-0x02,0x01,0x01,0x01,
-0x02,0x08,0x02,0x00,
-0x00,0x00,0x00,0x00 };
-
-
-const uint8_t lcss::UniversalMetadataSetKey[] = { 0x06,0x0E,0x2B,0x34,
-0x02,0x01,0x01,0x01,
-0x0E,0x01,0x01,0x02,
-0x01,0x01,0x00,0x00 };
-
 static const uint8_t UniversalMetadataElementKey[] = { 0x06, 0x0E, 0x2B, 0x34, 0x01 };
 
-class IsChecksum
-	:public Loki::BaseVisitor,
-	public Loki::Visitor<lcss::KLVChecksum>
-{
-public:
-	IsChecksum() :flag_(false) {}
-
-	void Visit(lcss::KLVChecksum& klv)
-	{
-		flag_ = true;
-	}
-
-	bool flag_;
-};
-
-namespace
-{
-	bool isEnd(lcss::KLVElement& klv)
-	{
-		IsChecksum vis;
-		klv.Accept(vis);
-
-		return vis.flag_;
-	}
-}
+uint64_t ntohll ( uint64_t Value );
+uint64_t htonll ( uint64_t Value );
 
 /////////////////////////////////////////////////////////////////////////////
 // KLVParser::Impl
@@ -216,7 +175,7 @@ void lcss::KLVParser::parse(const gsl::span<const uint8_t> buffer)
 		else if (_pimpl->state_ == lcss::KLVParser::Impl::STATE::START_SET_LEN_FLAG)
 		{
 			_pimpl->onEndLenFlag();
-			// handle boundry case when length bytes cross over two input buf arguments
+			// handle boundary case when length bytes cross over two input buffer arguments
 			_pimpl->pbuffer_.push_back(b);
 		}
 		else if (_pimpl->state_ == lcss::KLVParser::Impl::STATE::START_SET_LEN)
@@ -418,3 +377,4 @@ void lcss::KLVSecuritySetParser::parse(const gsl::span<uint8_t> buffer)
 		}
 	}
 }
+

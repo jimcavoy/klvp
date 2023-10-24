@@ -12,6 +12,8 @@ FetchContent_Declare(GSL
 
 FetchContent_MakeAvailable(GSL)
 
+include_directories(../../loki-lib/include)
+
 # Add source to this project's executable.
 file(GLOB SRC_LIST
     *.h
@@ -21,8 +23,6 @@ add_executable (klvp ${SRC_LIST})
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET klvp PROPERTY CXX_STANDARD 14)
 endif()
-
-include_directories(../../loki-lib/include)
 
 if(WIN32)
     list(APPEND EXTRA_LIBS Microsoft.GSL::GSL libklvp LibLdsDB wsock32 ws2_32)

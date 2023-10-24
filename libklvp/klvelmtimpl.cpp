@@ -65,6 +65,16 @@ void lcss::KLVElementImpl::setKey(uint8_t key)
 }
 int lcss::KLVElementImpl::length() const
 {return (int)value_.size();}
+int lcss::KLVElementImpl::numOfBytesForLength() const
+{
+	int sz = length();
+	if (sz < 0x80)
+		return 1;
+	else if (sz > 0x7F && sz < 0x0100)
+		return 2;
+	else
+		return 3;
+}
 void lcss::KLVElementImpl::value(uint8_t* buf) const
 {
 #ifdef WIN32

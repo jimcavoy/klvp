@@ -31,6 +31,7 @@ namespace lcss
 		int key(uint8_t* keybuf) const;
 		void setKey(uint8_t k);
 		int length() const;
+		int numOfBytesForLength() const;
 		void value(uint8_t*) const;
 		uint8_t* value();
 		void setValue(uint8_t* buf, int bufsz);
