@@ -7,6 +7,7 @@
 
 #include "loki/Visitor.h"
 
+#include <cstring>
 #include <vector>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -68,7 +69,7 @@ public:
 		_archive.push_back(grp.key());
 
 		encodeBERLength(len);
-		delete grp.appData();
+		delete (int*) grp.appData();
 	}
 
 	const uint8_t* data() noexcept
@@ -115,7 +116,7 @@ private:
 			_archive.push_back(key[i]);
 
 		encodeBERLength(len);
-		delete grp.appData();
+		delete (int*) grp.appData();
 	}
 
 	void doVisitElement(lcss::KLVElementImpl& elmt)

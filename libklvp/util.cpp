@@ -2,6 +2,8 @@
 
 #ifdef _WIN32
 #include <WinSock2.h>
+#else
+#include <netinet/in.h>
 #endif
 
 #include "KlvSizeVisitor.h"
@@ -9,6 +11,7 @@
 #include "treenode.h"
 
 #include <cstdint>
+#include <cstring>
 
 
 #define TreeNodePtr TreeNode<lcss::KLVElement>*
