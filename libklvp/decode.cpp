@@ -58,7 +58,11 @@ namespace lcss
 	{
 		int64_t lVal;
 		memcpy(&lVal, klv.value(), 8);
+#ifdef WIN32
 		tmValue = ntohll(lVal);
+#else
+		tmValue = lVal;
+#endif
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVMissionID& klv)
