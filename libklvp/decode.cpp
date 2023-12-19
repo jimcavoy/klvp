@@ -32,8 +32,6 @@ namespace lcss
 		: tmValue(0)
 		, fValue(0.0)
 		, nValue(0)
-		, frameCenterLat(0.0)
-		, frameCenterLon(0.0)
 	{
 
 	}
@@ -130,8 +128,6 @@ namespace lcss
 		memcpy(&nVal, klv.value(), 4);
 		int LDS = ntohl(nVal);
 		double UDS = 180.0 / 0xFFFFFFFE * LDS;
-		if (klv.key() == 0x17)
-			frameCenterLat = UDS;
 		fValue = UDS;
 	}
 
@@ -141,8 +137,6 @@ namespace lcss
 		memcpy(&nVal, klv.value(), 4);
 		int LDS = ntohl(nVal);
 		double UDS = 360.0 / 0xFFFFFFFE * LDS;
-		if (klv.key() == 0x18)
-			frameCenterLon = UDS;
 		fValue = UDS;
 	}
 
@@ -216,7 +210,6 @@ namespace lcss
 		memcpy(&nVal, klv.value(), 4);
 		int LDS = ntohl(nVal);
 		double UDS = 180.0 / 0xFFFFFFFE * LDS;
-		frameCenterLat = UDS;
 		fValue = UDS;
 	}
 
@@ -226,7 +219,6 @@ namespace lcss
 		memcpy(&nVal, klv.value(), 4);
 		int LDS = ntohl(nVal);
 		double UDS = 360.0 / 0xFFFFFFFE * LDS;
-		frameCenterLon = UDS;
 		fValue = UDS;
 	}
 
@@ -243,7 +235,7 @@ namespace lcss
 		short nVal;
 		memcpy(&nVal, klv.value(), 2);
 		short LDS = ntohs(nVal);
-		fValue = (0.15 / 0xFFFE * LDS) + frameCenterLat;
+		fValue = (0.15 / 0xFFFE * LDS);
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVOffsetCornerLongitudePoint1& klv)
@@ -251,7 +243,7 @@ namespace lcss
 		short nVal;
 		memcpy(&nVal, klv.value(), 2);
 		short LDS = ntohs(nVal);
-		fValue = (0.15 / 0xFFFE * LDS) + frameCenterLon;
+		fValue = (0.15 / 0xFFFE * LDS);
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVOffsetCornerLatitudePoint2& klv)
@@ -259,7 +251,7 @@ namespace lcss
 		short nVal;
 		memcpy(&nVal, klv.value(), 2);
 		short LDS = ntohs(nVal);
-		fValue = (0.15 / 0xFFFE * LDS) + frameCenterLat;
+		fValue = (0.15 / 0xFFFE * LDS);
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVOffsetCornerLongitudePoint2& klv)
@@ -267,7 +259,7 @@ namespace lcss
 		short nVal;
 		memcpy(&nVal, klv.value(), 2);
 		short LDS = ntohs(nVal);
-		fValue = (0.15 / 0xFFFE * LDS) + frameCenterLon;
+		fValue = (0.15 / 0xFFFE * LDS);
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVOffsetCornerLatitudePoint3& klv)
@@ -275,7 +267,7 @@ namespace lcss
 		short nVal;
 		memcpy(&nVal, klv.value(), 2);
 		short LDS = ntohs(nVal);
-		fValue = (0.15 / 0xFFFE * LDS) + frameCenterLat;
+		fValue = (0.15 / 0xFFFE * LDS);
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVOffsetCornerLongitudePoint3& klv)
@@ -283,7 +275,7 @@ namespace lcss
 		short nVal;
 		memcpy(&nVal, klv.value(), 2);
 		short LDS = ntohs(nVal);
-		fValue = (0.15 / 0xFFFE * LDS) + frameCenterLon;
+		fValue = (0.15 / 0xFFFE * LDS);
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVOffsetCornerLatitudePoint4& klv)
@@ -291,7 +283,7 @@ namespace lcss
 		short nVal;
 		memcpy(&nVal, klv.value(), 2);
 		short LDS = ntohs(nVal);
-		fValue = (0.15 / 0xFFFE * LDS) + frameCenterLat;
+		fValue = (0.15 / 0xFFFE * LDS);
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVOffsetCornerLongitudePoint4& klv)
@@ -299,7 +291,7 @@ namespace lcss
 		short nVal;
 		memcpy(&nVal, klv.value(), 2);
 		short LDS = ntohs(nVal);
-		fValue = (0.15 / 0xFFFE * LDS) + frameCenterLon;
+		fValue = (0.15 / 0xFFFE * LDS);
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVIcingDetected& klv)

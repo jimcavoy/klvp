@@ -309,8 +309,6 @@ namespace lcss
 		double		fValue;
 		int			nValue;
 		std::string	strValue;
-		double		frameCenterLat;
-		double		frameCenterLon;
 	};
 
 	int decodeBERLength(int* numBytesRead, const uint8_t* buffer, int size);
