@@ -296,6 +296,13 @@ int lcss::KLVElement::parse(uint8_t* buf, int size)
 			for (size_t i = 0; i < len; i++)
 				pimpl_->push_back(buf[p++]);
 		}
+		else if (len == 4) { // it should be 2 
+			pimpl_ = std::shared_ptr<lcss::KLVElementImpl>(new lcss::KLVTargetWidth);
+			p++;
+			p++;
+			for (size_t i = 2; i < 4; i++)
+				pimpl_->push_back(buf[p++]);
+		}
 		else {
 			pimpl_ = std::shared_ptr<lcss::KLVElementImpl>(new lcss::KLVParseError(key, "Syntax error when parsing Target Width."));
 			p += len;
