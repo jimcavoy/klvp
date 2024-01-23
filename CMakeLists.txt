@@ -5,6 +5,7 @@ cmake_minimum_required (VERSION 3.8)
 
 project (klvp
 	VERSION 0.1.0
+	DESCRIPTION "STANAG 4609 ST 0601 KLV Parser"
 	LANGUAGES C CXX
 )
 
@@ -32,9 +33,9 @@ FetchContent_Declare(GSL
 FetchContent_MakeAvailable(GSL)
 
 if(WIN32)
-    list(APPEND EXTRA_LIBS Microsoft.GSL::GSL klvp ldsdb wsock32 ws2_32)
-    target_link_libraries(klvptest PRIVATE ${EXTRA_LIBS})
+    list(APPEND EXTRA_LIBS Microsoft.GSL::GSL klvp ldsdb wsock32 ws2_32)    
 else()
     list(APPEND EXTRA_LIBS Microsoft.GSL::GSL klvp ldsdb uuid)
-    target_link_libraries(klvptest PRIVATE ${EXTRA_LIBS})
 endif()
+
+target_link_libraries(klvptest PRIVATE ${EXTRA_LIBS})

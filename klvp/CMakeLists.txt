@@ -43,6 +43,15 @@ target_include_directories(klvp
           PRIVATE src/klvp
 		  PUBLIC include
           )
+		  
+include(GNUInstallDirs)
+
+install(TARGETS klvp)
+
+install (
+	DIRECTORY include/
+	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
 
 #file(GLOB LIB_INCLUDE_FILES "./*.h")
 
