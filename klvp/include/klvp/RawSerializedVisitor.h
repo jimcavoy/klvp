@@ -5,7 +5,7 @@
 #include "klvsselmtimpl.h"
 #include "util.h"
 
-#include "loki/Visitor.h"
+#include <loki/Visitor.h>
 
 #include <cstring>
 #include <vector>

@@ -2,10 +2,10 @@
 #define KLVSecuritySetPrintVisitor_H
 
 // klvsslex generated on Tue Aug 06 10:36:49 2013
+#include <klvp/klvelmt.h>
+#include <klvp/klvsselmtimpl.h>
 
-#include "klvelmt.h"
-#include "klvsselmtimpl.h"
-#include "loki/Visitor.h"
+#include <loki/Visitor.h>
 
 class KLVSecuritySetPrintVisitor
 	: public Loki::BaseVisitor,

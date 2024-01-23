@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 {
 	if(argc != 3)
 	{
-		cerr << "usage: klvp infile databaseUrl" << endl;
+		cerr << "usage: klvptest infile databaseUrl" << endl;
 		return -1;
 	}
 

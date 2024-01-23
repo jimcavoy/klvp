@@ -1,4 +1,6 @@
-#include "util.h"
+#include <klvp/util.h>
+#include <klvp/KlvSizeVisitor.h>
+#include <klvp/treenode.h>
 
 #ifdef _WIN32
 #include <WinSock2.h>
@@ -6,9 +8,7 @@
 #include <netinet/in.h>
 #endif
 
-#include "KlvSizeVisitor.h"
-#include "RawSerializedVisitor.h"
-#include "treenode.h"
+#include <klvp/RawSerializedVisitor.h>
 
 #include <cstdint>
 #include <cstring>

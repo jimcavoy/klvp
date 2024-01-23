@@ -3,15 +3,39 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-# Enable Hot Reload for MSVC compilers if supported.
-if (POLICY CMP0141)
-  cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
-endif()
-
-project ("klvp")
+project (klvp
+	VERSION 0.1.0
+	DESCRIPTION "STANAG 4609 ST 0601 KLV Parser"
+	LANGUAGES C CXX
+)
 
 # Include sub-projects.
-add_subdirectory ("libklvp")
-add_subdirectory ("LibLdsDB")
-add_subdirectory ("klvp")
+add_subdirectory (klvp)
+add_subdirectory (ldsdb)
+
+include_directories(../loki-lib/include)
+
+add_executable(klvptest)
+
+file(GLOB SRC_LIST
+    src/*.cpp)
+	
+target_sources(klvptest PRIVATE ${SRC_LIST})
+
+include(FetchContent)
+
+FetchContent_Declare(GSL
+    GIT_REPOSITORY "https://github.com/microsoft/GSL"
+    GIT_TAG "v4.0.0"
+    GIT_SHALLOW ON
+)
+
+FetchContent_MakeAvailable(GSL)
+
+if(WIN32)
+    list(APPEND EXTRA_LIBS Microsoft.GSL::GSL klvp ldsdb wsock32 ws2_32)    
+else()
+    list(APPEND EXTRA_LIBS Microsoft.GSL::GSL klvp ldsdb uuid)
+endif()
+
+target_link_libraries(klvptest PRIVATE ${EXTRA_LIBS})
