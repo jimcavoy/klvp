@@ -1,4 +1,4 @@
-#include "ldsdb.h"
+#include <ldsdb/ldsdb.h>
 
 #include "sqlite3.h"
 

@@ -1,6 +1,16 @@
-﻿# CMakeList.txt : CMake project for klvp, include source and define
-# project specific logic here.
-#
+cmake_minimum_required (VERSION 3.14)
+project(klvp
+    VERSION 1.0 
+    DESCRIPTION "STANAG 4609 ST 0601 KLV parser library"
+    LANGUAGES C CXX)
+
+# specify the C++ standard
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+if (WIN32)
+    set(CMAKE_INSTALL_LIBDIR $ENV{APPDATA})
+endif()
 
 include(FetchContent)
 
@@ -14,22 +24,43 @@ FetchContent_MakeAvailable(GSL)
 
 include_directories(../../loki-lib/include)
 
-# Add source to this project's executable.
+add_library(klvp STATIC)
+
 file(GLOB SRC_LIST
-    *.h
-    *.cpp)
-add_executable (klvp ${SRC_LIST})
+    src/*.cpp)
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET klvp PROPERTY CXX_STANDARD 14)
+target_sources(klvp PRIVATE ${SRC_LIST})
+
+set_property(TARGET klvp PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+if(WIN32)    
+    target_link_libraries(klvp PRIVATE Microsoft.GSL::GSL wsock32 ws2_32)
+else()    
+    target_link_libraries(klvp PRIVATE Microsoft.GSL::GSL)    
 endif()
 
-if(WIN32)
-    list(APPEND EXTRA_LIBS Microsoft.GSL::GSL libklvp LibLdsDB wsock32 ws2_32)
-    target_link_libraries(klvp PRIVATE ${EXTRA_LIBS})
-else()
-    list(APPEND EXTRA_LIBS Microsoft.GSL::GSL libklvp LibLdsDB uuid)
-    target_link_libraries(klvp PRIVATE ${EXTRA_LIBS})
-endif()
+target_include_directories(klvp
+          PRIVATE src/klvp
+		  PUBLIC include
+          )
 
-# TODO: Add tests and install targets if needed.
+#file(GLOB LIB_INCLUDE_FILES "./*.h")
+
+# install the target and create export-set
+#install(TARGETS libklvp 
+#    EXPORT libklvpTargets
+#    LIBRARY DESTINATION lib
+#    ARCHIVE DESTINATION lib
+#    RUNTIME DESTINATION bin
+#    INCLUDES DESTINATION include
+#)
+
+# install header file
+#install(FILES ${LIB_INCLUDE_FILES} DESTINATION include)
+
+# generate and install export file
+#install(EXPORT libklvpTargets
+#        FILE libklvpTargets.cmake
+#        NAMESPACE lcss::
+#        DESTINATION ${CMAKE_INSTALL_LIBDIR}/lib/cmake/libklvp
+#)

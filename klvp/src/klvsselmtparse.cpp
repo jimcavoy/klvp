@@ -1,6 +1,7 @@
-#include "klvelmt.h"
-#include "klvsselmtimpl.h"
-#include "decode.h"
+#include <klvp/klvelmt.h>
+#include <klvp/klvsselmtimpl.h>
+#include <klvp/decode.h>
+
 // klvsslex generated on Thu Aug 15 09:15:01 2013
 
 int lcss::KLVElement::parseSecuritySetElement(uint8_t* buf, int size)

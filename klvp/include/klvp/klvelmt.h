@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "loki/Visitor.h"
+#include <loki/Visitor.h>
 #include <string>
 #include <cstdint>
 

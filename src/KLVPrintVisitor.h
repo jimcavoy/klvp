@@ -3,13 +3,12 @@
 
 // klvlex generated on Mon Aug 05 14:54:11 2013
 
-#include "klvelmt.h"
-#include "klvelmtimpl.h"
-#include "klvuselmtimpl.h"
-#include "decode.h"
-
-#include "loki/Visitor.h"
-#include "ldsdb.h"
+#include <klvp/klvelmt.h>
+#include <klvp/klvelmtimpl.h>
+#include <klvp/klvuselmtimpl.h>
+#include <klvp/decode.h>
+#include <ldsdb/ldsdb.h>
+#include <loki/Visitor.h>
 
 class KLVPrintVisitor
 	: public Loki::BaseVisitor,

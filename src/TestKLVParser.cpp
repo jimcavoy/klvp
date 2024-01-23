@@ -1,7 +1,7 @@
 #include "TestKLVParser.h"
 
-#include "klvelmt.h"
-#include "klvelmtimpl.h"
+#include <klvp/klvelmt.h>
+#include <klvp/klvelmtimpl.h>
 
 #include <iostream>
 
