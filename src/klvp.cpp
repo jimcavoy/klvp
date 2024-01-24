@@ -53,8 +53,7 @@ int main(int argc, char* argv[])
 	cout << "</KLV>" << endl;
 
 	cerr << "KLV count = " << p.count() << endl;
-	//cerr << endl << "Enter any key to exit" << endl;
-	//_getch();
+
 	return 0;
 }
 
