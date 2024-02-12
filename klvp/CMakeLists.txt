@@ -8,10 +8,6 @@ project(klvp
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-if (WIN32)
-    set(CMAKE_INSTALL_LIBDIR $ENV{APPDATA})
-endif()
-
 include(FetchContent)
 
 FetchContent_Declare(GSL
