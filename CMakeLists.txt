@@ -4,7 +4,7 @@
 cmake_minimum_required (VERSION 3.21)
 
 project (klvp
-	VERSION 0.1.0
+	VERSION 1.0.0
 	DESCRIPTION "STANAG 4609 ST 0601 KLV Parser"
 	LANGUAGES C CXX
 )
