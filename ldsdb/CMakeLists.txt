@@ -4,17 +4,22 @@ project(ldsdb
     DESCRIPTION "STANAG 4609 ST 0601 LDS Database library"
     LANGUAGES C CXX)
 
-if (WIN32)
-	include_directories($ENV{ProgramFiles}/sqlite3/include)
-else()
-	include_directories(../../sqlite3-cmake/libs/include)
-endif()
+include(FetchContent)
+
+FetchContent_Declare(sqlite
+    GIT_REPOSITORY https://github.com/alex85k/sqlite3-cmake.git
+    GIT_TAG master
+)
+
+FetchContent_MakeAvailable(sqlite)
+
+include_directories(${CMAKE_BINARY_DIR}/_deps/sqlite-src/src)
 
 add_library(ldsdb STATIC)
 
 file(GLOB SRC_LIST
     src/*.cpp)
-	
+
 target_sources(ldsdb PRIVATE ${SRC_LIST})
 
 set_property(TARGET ldsdb PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -26,6 +31,6 @@ target_compile_features(
 )
 
 target_include_directories(ldsdb
-          PRIVATE src/ldsdb
-          PUBLIC include
-          )
+    PRIVATE src/ldsdb
+    PUBLIC include
+)

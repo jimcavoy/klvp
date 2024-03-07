@@ -12,12 +12,26 @@ set(klvp_INSTALL_CMAKEDIR cmake CACHE PATH "Installation directory for config-fi
 
 # set the postfix "d" for the resulting .so or .dll files when building the
 # library in debug mode
-set(CMAKE_DEBUG_POSTFIX
-    d
+set(CMAKE_DEBUG_POSTFIX d)
+
+# include the module `ExternalProject`
+include(ExternalProject)
+
+# Add an external project from a downloaded source archive
+ExternalProject_Add(
+  loki-lib
+  URL https://github.com/snaewe/loki-lib/archive/refs/tags/Release_0_1_5.tar.gz
+  URL_HASH MD5=74e60c683f745dc15c6e772927349483
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
 )
 
+ExternalProject_Get_Property(loki-lib SOURCE_DIR)
 
-include_directories(../../loki-lib/include)
+set(LOKI_DIR "${SOURCE_DIR}")
+
+include_directories(${LOKI_DIR}/include)
 
 add_library(klvp STATIC)
 
@@ -27,6 +41,8 @@ file(GLOB SRC_LIST
 target_sources(klvp PRIVATE ${SRC_LIST})
 
 set_property(TARGET klvp PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+add_dependencies(klvp loki-lib)
 
 # specify the C++ standard
 target_compile_features(
@@ -51,8 +67,8 @@ install(TARGETS klvp
 )
 
 install (
-	DIRECTORY ${PROJECT_SOURCE_DIR}/include/
-	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+    DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
 install (EXPORT klvp_export

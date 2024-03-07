@@ -13,7 +13,7 @@ project (klvp
 add_subdirectory (klvp)
 add_subdirectory (ldsdb)
 
-include_directories(../loki-lib/include)
+include_directories(${CMAKE_BINARY_DIR}/klvp/loki-lib-prefix/src/loki-lib/include)
 
 add_executable(klvptest)
 
@@ -25,7 +25,7 @@ target_sources(klvptest PRIVATE ${SRC_LIST})
 include(FetchContent)
 
 FetchContent_Declare(GSL
-    GIT_REPOSITORY "https://github.com/microsoft/GSL"
+    GIT_REPOSITORY https://github.com/microsoft/GSL.git
     GIT_TAG "v4.0.0"
     GIT_SHALLOW ON
 )
@@ -45,7 +45,7 @@ enable_testing()
 
 set(args ${PROJECT_SOURCE_DIR}/sample/svt_testset_420_720p50_klved_4774.klv ${PROJECT_SOURCE_DIR}/data/klv.s3db)
 add_test(NAME read_test 
-	COMMAND klvptest ${args}
-	)
+    COMMAND klvptest ${args}
+)
 set_tests_properties(read_test
     PROPERTIES PASS_REGULAR_EXPRESSION "KLV count = 2503")
