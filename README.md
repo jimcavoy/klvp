@@ -4,7 +4,7 @@ STANAG 4609 ST 0601 Key-Length-Value (KLV) parser library
 ## To Build and Install
 In __klvp__ root directory, build and install this project using CMake with the following commmands on a terminal:
 
-### 1. Generate the build envirnoment
+### 1. Generate the build environment
     cmake -S . -B ./build 
 ### 2. Build the library and test application
     cmake --build ./build 
