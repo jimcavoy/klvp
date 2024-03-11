@@ -19,10 +19,17 @@ const char* IDS_QUERY_VALIDVALUES = "SELECT Key, DisplayName, ValidValue, Coding
 const char* IDS_QUERY_RIGHTS = "SELECT KlvTag, Name, Units, Format, Length, CRUD FROM UasLds JOIN (CountryCode JOIN CountryKlvCrudAssoc ON CountryCode.ID = CountryKlvCrudAssoc.CountryCodeId) ON UasLds.Key = KlvTag WHERE ((STANAG1059_2Letters='%s') OR (STANAG1059_3Letters='%s'));";
 const char* IDS_QUERY_SECURITY_RIGHTS = "SELECT KlvTag, Name, Units, Format, Length, CRUD FROM SecurityLds JOIN (CountryCode JOIN CountrySecKlvCrudAssoc ON CountryCode.ID = CountrySecKlvCrudAssoc.CountryCodeId) ON SecurityLds.Key = KlvTag WHERE ((STANAG1059_2Letters='%s')OR(STANAG1059_3Letters='%s'));";
 
+class LDSDatabase::Impl
+{
+public:
+	Impl() {}
+	~Impl() {}
+
+	sqlite3* _db{ nullptr };
+};
+
 LDSDatabase::LDSDatabase()
-	: _db(nullptr)
-	, _frameCenterLat(0.0)
-	, _frameCenterLon(0.0)
+	: _pimpl(std::make_unique<Impl>())
 {
 }
 
@@ -36,12 +43,12 @@ bool LDSDatabase::connect(const char* uriFilename)
 	int rc = 0;
 	char* zErrmsg = 0;
 
-	if (_db == nullptr)
+	if (_pimpl->_db == nullptr)
 	{
-		rc = sqlite3_open_v2(uriFilename, &_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_URI, NULL);
+		rc = sqlite3_open_v2(uriFilename, &_pimpl->_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_URI, NULL);
 		if (rc)
 		{
-			fprintf(stderr, "Sqlite Error: %s\n", sqlite3_errmsg(_db));
+			fprintf(stderr, "Sqlite Error: %s\n", sqlite3_errmsg(_pimpl->_db));
 			disconnect();
 			return false;
 		}
@@ -51,16 +58,16 @@ bool LDSDatabase::connect(const char* uriFilename)
 
 void LDSDatabase::disconnect()
 {
-	if (_db != nullptr)
+	if (_pimpl->_db != nullptr)
 	{
-		sqlite3_close(_db);
-		_db = nullptr;
+		sqlite3_close(_pimpl->_db);
+		_pimpl->_db = nullptr;
 	}
 }
 
 bool LDSDatabase::is_open() const
 {
-	return _db != nullptr ? true : false;
+	return _pimpl->_db != nullptr ? true : false;
 }
 
 
@@ -150,7 +157,7 @@ void LDSDatabase::fetch(LDSEntry* entry)
 	char cmdstr[BUFSIZ]{};
 	create_sqlstmt(cmdstr, BUFSIZ, *entry);
 
-	rc = sqlite3_exec(_db, cmdstr, fetch_callback, (void*)entry, &zErrMsg);
+	rc = sqlite3_exec(_pimpl->_db, cmdstr, fetch_callback, (void*)entry, &zErrMsg);
 
 	if (rc != SQLITE_OK)
 	{
@@ -166,7 +173,7 @@ void LDSDatabase::fetch_security(LDSEntry* entry)
 	char cmdstr[BUFSIZ]{};
 	create_security_sqlstmt(cmdstr, BUFSIZ, *entry);
 
-	rc = sqlite3_exec(_db, cmdstr, fetch_callback, (void*)entry, &zErrMsg);
+	rc = sqlite3_exec(_pimpl->_db, cmdstr, fetch_callback, (void*)entry, &zErrMsg);
 
 	if (rc != SQLITE_OK)
 	{
@@ -342,7 +349,7 @@ size_t LDSDatabase::fetch_list(T back_inserter)
 	const char* cmdstr = "select Key, Name, Units, Format, Length, Description from UasLds;";
 	std::vector<LDSEntry> res;
 
-	rc = sqlite3_exec(_db, cmdstr, fetch_list_callback, (void*)&res, &zErrMsg);
+	rc = sqlite3_exec(_pimpl->_db, cmdstr, fetch_list_callback, (void*)&res, &zErrMsg);
 
 	if (rc != SQLITE_OK)
 	{
@@ -408,7 +415,7 @@ size_t LDSDatabase::fetch_security_elements_validvalues(T first, T last)
 
 	std::multimap<int, ValidValue> mapVv;
 
-	rc = sqlite3_exec(_db, IDS_QUERY_VALIDVALUES, fetch_security_elements_validvalues_callback, (void*)&mapVv, &zErrMsg);
+	rc = sqlite3_exec(_pimpl->_db, IDS_QUERY_VALIDVALUES, fetch_security_elements_validvalues_callback, (void*)&mapVv, &zErrMsg);
 
 	if (rc != SQLITE_OK)
 	{
@@ -439,7 +446,7 @@ size_t LDSDatabase::fetch_security_elements(T backInsertIt)
 	const char* cmdstr = "select Key, Name, Units, Format, Length from Securitylds;";
 	std::vector<LDSEntry> res;
 
-	rc = sqlite3_exec(_db, cmdstr, fetch_list_callback, (void*)&res, &zErrMsg);
+	rc = sqlite3_exec(_pimpl->_db, cmdstr, fetch_list_callback, (void*)&res, &zErrMsg);
 
 	if (rc != SQLITE_OK)
 	{
@@ -496,7 +503,7 @@ size_t LDSDatabase::fetch_list_rights(T backInsertIt, const char* countryCode)
 
 	sprintf_s(cmdstr, IDS_QUERY_RIGHTS, countryCode, countryCode);
 
-	rc = sqlite3_exec(_db, cmdstr, fetch_list_rights_callback, (void*)&res, &zErrMsg);
+	rc = sqlite3_exec(_pimpl->_db, cmdstr, fetch_list_rights_callback, (void*)&res, &zErrMsg);
 
 	if (rc != SQLITE_OK)
 	{
@@ -520,7 +527,7 @@ size_t LDSDatabase::fetch_security_list_rights(T backInsertIt, const char* count
 
 	sprintf_s(cmdstr, IDS_QUERY_SECURITY_RIGHTS, countryCode, countryCode);
 
-	rc = sqlite3_exec(_db, cmdstr, fetch_list_rights_callback, (void*)&res, &zErrMsg);
+	rc = sqlite3_exec(_pimpl->_db, cmdstr, fetch_list_rights_callback, (void*)&res, &zErrMsg);
 
 	if (rc != SQLITE_OK)
 	{

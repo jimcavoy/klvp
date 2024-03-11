@@ -50,7 +50,7 @@ target_compile_features(
     PUBLIC cxx_std_14
 )
 
-if(WIN32)    
+if(WIN32)
     set(WS wsock32 ws2_32)
 endif()
 
