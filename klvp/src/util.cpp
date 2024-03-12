@@ -11,7 +11,6 @@
 #include <klvp/RawSerializedVisitor.h>
 
 #include <cstdint>
-#include <cstring>
 
 
 #define TreeNodePtr TreeNode<lcss::KLVElement>*

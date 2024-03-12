@@ -61,6 +61,12 @@ public:
 	LDSDatabase();
 	~LDSDatabase();
 
+	LDSDatabase(LDSDatabase&&) noexcept;
+	LDSDatabase(const LDSDatabase&) = delete;
+
+	LDSDatabase& operator=(LDSDatabase&&) noexcept;
+	LDSDatabase& operator=(LDSDatabase&) = delete;
+
 	bool connect(const char* databaseFilePath);
 	void disconnect();
 	bool is_open() const;

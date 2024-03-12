@@ -1,6 +1,6 @@
 #pragma once
 
-#include "loki/Visitor.h"
+#include <loki/Visitor.h>
 #include "klvelmtimpl.h"
 
 namespace lcss

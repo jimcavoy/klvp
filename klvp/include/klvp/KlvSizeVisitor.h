@@ -4,7 +4,7 @@
 #include "klvuselmtimpl.h"
 #include "klvsselmtimpl.h"
 
-#include "loki/Visitor.h"
+#include <loki/Visitor.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // KlvSizeVisitor

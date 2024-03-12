@@ -2,7 +2,6 @@
 #include <klvp/FpParser.h>
 
 #include <cstdint>
-#include <string.h>
 #ifdef WIN32
 #include <WinSock2.h>
 #else

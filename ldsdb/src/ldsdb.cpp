@@ -29,7 +29,7 @@ public:
 };
 
 LDSDatabase::LDSDatabase()
-	: _pimpl(std::make_unique<Impl>())
+	: _pimpl{ std::make_unique<Impl>() }
 {
 }
 
@@ -37,6 +37,10 @@ LDSDatabase::~LDSDatabase()
 {
 	disconnect();
 }
+
+LDSDatabase::LDSDatabase(LDSDatabase&&) noexcept = default;
+
+LDSDatabase& LDSDatabase::operator=(LDSDatabase&&) noexcept = default;
 
 bool LDSDatabase::connect(const char* uriFilename)
 {
