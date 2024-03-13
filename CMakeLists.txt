@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 3.21)
 
 project (klvp
 	VERSION 1.0.0
-	DESCRIPTION "STANAG 4609 ST 0601 KLV Parser"
+	DESCRIPTION "STANAG 4609 ST 0601 KLV Parser Library"
 	LANGUAGES C CXX
 )
 
@@ -13,32 +13,30 @@ project (klvp
 add_subdirectory (klvp)
 add_subdirectory (ldsdb)
 
-include_directories(${CMAKE_BINARY_DIR}/klvp/loki-lib-prefix/src/loki-lib/include)
-
 add_executable(klvptest)
 
-file(GLOB SRC_LIST
-    src/*.cpp)
-
-target_sources(klvptest PRIVATE ${SRC_LIST})
-
-include(FetchContent)
-
-FetchContent_Declare(GSL
-    GIT_REPOSITORY https://github.com/microsoft/GSL.git
-    GIT_TAG "v4.0.0"
-    GIT_SHALLOW ON
+target_sources(klvptest PRIVATE
+    src/klvp.h 
+    src/klvp.cpp 
+    src/KLVPrintVisitor.h
+    src/KLVPrintVisitor.cpp
+    src/KLVSecuritySetPrintVisitor.h
+    src/KLVSecuritySetPrintVisitor.cpp
+    src/TestKLVParser.h
+    src/TestKLVParser.cpp
+    src/TestKLVSecuritySetParser.h
+    src/TestKLVSecuritySetParser.cpp
 )
 
-FetchContent_MakeAvailable(GSL)
-
 if(WIN32)
-    list(APPEND EXTRA_LIBS Microsoft.GSL::GSL klvp ldsdb wsock32 ws2_32)
+    list(APPEND EXTRA_LIBS klvp ldsdb wsock32 ws2_32)
 else()
-    list(APPEND EXTRA_LIBS Microsoft.GSL::GSL klvp ldsdb uuid)
+    list(APPEND EXTRA_LIBS klvp ldsdb uuid)
 endif()
 
 target_link_libraries(klvptest PRIVATE ${EXTRA_LIBS})
+
+target_link_libraries(klvptest INTERFACE Microsoft.GSL::GSL)
 
 # Test cases
 enable_testing()

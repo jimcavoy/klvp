@@ -33,12 +33,44 @@ set(LOKI_DIR "${SOURCE_DIR}")
 
 include_directories(${LOKI_DIR}/include)
 
+include(FetchContent)
+
+FetchContent_Declare(GSL
+    GIT_REPOSITORY https://github.com/microsoft/GSL.git
+    GIT_TAG "v4.0.0"
+    GIT_SHALLOW ON
+)
+
+FetchContent_MakeAvailable(GSL)
+
 add_library(klvp STATIC)
 
-file(GLOB SRC_LIST
-    src/*.cpp)
-
-target_sources(klvp PRIVATE ${SRC_LIST})
+target_sources(klvp PRIVATE 
+	src/decode.cpp
+	src/encode.cpp
+	src/FpParser.cpp
+	src/klvelmt.cpp
+	src/klvelmtimpl.cpp
+	src/klvelmtparse.cpp
+	src/klvprsr.cpp
+	src/KlvSizeVisitor.cpp
+	src/klvsselmtimpl.cpp
+	src/klvsselmtparse.cpp
+	src/klvuselmtimpl.cpp
+	src/util.cpp
+	include/klvp/decode.h
+	include/klvp/encode.h
+	include/klvp/FpParser.h
+	include/klvp/klvelmt.h
+	include/klvp/klvelmtimpl.h
+	include/klvp/klvprsr.h
+	include/klvp/KlvSizeVisitor.h
+	include/klvp/klvsselmtimpl.h
+	include/klvp/klvuselmtimpl.h
+	include/klvp/RawSerializedVisitor.h
+	include/klvp/treenode.h
+	include/klvp/util.h
+)
 
 set_property(TARGET klvp PROPERTY POSITION_INDEPENDENT_CODE ON)
 
@@ -54,16 +86,20 @@ if(WIN32)
     set(WS wsock32 ws2_32)
 endif()
 
-target_link_libraries(klvp PRIVATE Microsoft.GSL::GSL ${WS})
+target_link_libraries(klvp 
+    PRIVATE ${WS}
+    INTERFACE Microsoft.GSL::GSL
+)
 
 target_include_directories(klvp
-          PRIVATE src/klvp
-          PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE src/klvp
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    INTERFACE $<BUILD_INTERFACE:${LOKI_DIR}/include>
 )
 
 install(TARGETS klvp
-        EXPORT klvp_export
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    EXPORT klvp_export
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 install (
@@ -72,9 +108,9 @@ install (
 )
 
 install (EXPORT klvp_export
-        FILE klvp-config.cmake
-        NAMESPACE lcss::
-        DESTINATION ${klvp_INSTALL_CMAKEDIR}
+    FILE klvp-config.cmake
+    NAMESPACE lcss::
+    DESTINATION ${klvp_INSTALL_CMAKEDIR}
 )
 
 # Defines write_basic_package_version_file
