@@ -1,14 +1,13 @@
 #include <klvp/encode.h>
 #include <klvp/FpParser.h>
 
-#include <string.h>
-#include <math.h>
-
 #ifdef WIN32
 #include <Rpc.h>
 #else
+#include <cstring>
 #include <netinet/in.h>
 #include <uuid/uuid.h>
+#include <cmath>
 
 uint64_t htonll(uint64_t value)
 {
@@ -992,14 +991,18 @@ namespace lcss
 		uint8_t val[18]{};
 		std::string strUuid = strValue.substr(5, 36);
 		unsigned char* pszUuid = (unsigned char*)strUuid.c_str();
-		UuidFromStringA(pszUuid, &uuid);
-		// Set up for network order;
-		uuid.Data1 = htonl(uuid.Data1);
-		uuid.Data2 = htons(uuid.Data2);
-		uuid.Data3 = htons(uuid.Data3);
-		val[0] = chVer;
-		val[1] = chUsage;
-		memcpy(val + 2, &uuid, 16);
+		auto ret = UuidFromStringA(pszUuid, &uuid);
+
+		if (ret == RPC_S_OK)
+		{
+			// Set up for network order;
+			uuid.Data1 = htonl(uuid.Data1);
+			uuid.Data2 = htons(uuid.Data2);
+			uuid.Data3 = htons(uuid.Data3);
+			val[0] = chVer;
+			val[1] = chUsage;
+			memcpy(val + 2, &uuid, 16);
+		}
 		klv.setValue(val, 18);
 #else
 		uuid_t uuid;

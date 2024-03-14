@@ -2,7 +2,8 @@
 
 #include "klvelmt.h"
 #include "klvelmtimpl.h"
-#include "loki/Visitor.h"
+
+#include <loki/Visitor.h>
 
 namespace lcss
 {

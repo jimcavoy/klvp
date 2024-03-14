@@ -44,7 +44,7 @@ public:
 	double decode(const unsigned char* buffer, int bufsiz);
 
 private:
-	double decodeAsNormalMappedValue(const unsigned char* valueBuffer, int bufsiz);
+	double decodeAsNormalMappedValue(const unsigned char* valueBuffer, int bufsiz) const;
 
 private:
 	double _a;

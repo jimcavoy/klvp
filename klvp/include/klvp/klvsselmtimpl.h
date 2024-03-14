@@ -2,7 +2,7 @@
 #define KLVSSELMTIMPL_H 
 // klvsslex generated on Thu Aug 15 09:15:01 2013
 
-#include "loki/Visitor.h"
+#include <loki/Visitor.h>
 #include "klvelmtimpl.h"
 
 namespace lcss

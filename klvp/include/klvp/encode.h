@@ -6,7 +6,7 @@
 #include "klvelmt.h"
 #include "klvelmtimpl.h"
 #include "klvsselmtimpl.h"
-#include "loki/Visitor.h"
+#include <loki/Visitor.h>
 #ifdef WIN32
 #include <WinSock2.h>
 #endif

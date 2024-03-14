@@ -1,7 +1,7 @@
 #include <klvp/klvelmtimpl.h>
 
 #include <iterator>
-#include <memory.h>
+#include <cstring>
 #ifdef WIN32
 #include <WinSock2.h>
 #else

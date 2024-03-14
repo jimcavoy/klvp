@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <cstdint>
-#include <memory.h>
+#include <cstring>
 #ifdef WIN32
 #include <winsock2.h>
 #else
@@ -151,7 +151,7 @@ double FpParser::decode(const unsigned char* buffer, int bufsiz)
 	}
 }
 
-double FpParser::decodeAsNormalMappedValue(const unsigned char* valueBuffer, int bufsiz)
+double FpParser::decodeAsNormalMappedValue(const unsigned char* valueBuffer, int bufsiz) const
 {
 	double val = 0.0;
 

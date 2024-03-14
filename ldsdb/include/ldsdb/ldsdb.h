@@ -1,11 +1,9 @@
 #pragma once
 
 #include <vector>
-#include <cstdio>
+#include <memory>
 
-#define MAX_DATA BUFSIZ
-
-struct sqlite3;
+#define MAX_DATA 512
 
 /// <summary>
 /// 
@@ -63,6 +61,12 @@ public:
 	LDSDatabase();
 	~LDSDatabase();
 
+	LDSDatabase(LDSDatabase&&) noexcept;
+	LDSDatabase(const LDSDatabase&) = delete;
+
+	LDSDatabase& operator=(LDSDatabase&&) noexcept;
+	LDSDatabase& operator=(LDSDatabase&) = delete;
+
 	bool connect(const char* databaseFilePath);
 	void disconnect();
 	bool is_open() const;
@@ -82,13 +86,12 @@ private:
 	/// <summary>
 	/// Fetches the security elements.
 	/// </summary>
-	/// <param name="backInsertIt">The back inserter itertor.</param>
+	/// <param name="backInsertIt">The back inserter iterator.</param>
 	/// <returns></returns>
 	template<class T> size_t fetch_security_elements(T backInsertIt);
 
 private:
-	sqlite3* _db;
-	float _frameCenterLat;
-	float _frameCenterLon;
+	class Impl;
+	std::unique_ptr<Impl> _pimpl;
 };
 

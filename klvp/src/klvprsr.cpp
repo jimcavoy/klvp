@@ -1,5 +1,4 @@
 #include <klvp/klvprsr.h>
-#include <klvp/klvelmtimpl.h>
 #include <klvp/util.h>
 
 #include <cstdint>
@@ -34,7 +33,7 @@ namespace lcss
 		void onEndKey(TYPE type);
 		void onEndSetKey();
 		void onEndLenFlag();
-		void onBegin(KLVParser& parser, int len);
+		void onBegin(KLVParser& parser, int len) const;
 
 	public:
 		STATE					state_{lcss::KLVParser::Impl::STATE::START_SET_KEY};
@@ -65,7 +64,7 @@ namespace lcss
 		pbuffer_.clear();
 	}
 
-	void KLVParser::Impl::onBegin(KLVParser& parser, int len)
+	void KLVParser::Impl::onBegin(KLVParser& parser, int len) const
 	{
 		switch (type_)
 		{
