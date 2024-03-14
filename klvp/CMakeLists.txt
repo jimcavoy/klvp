@@ -44,7 +44,9 @@ FetchContent_Declare(GSL
 
 FetchContent_MakeAvailable(GSL)
 
-FetchContent_GetProperties(GSL)
+set(GSL_SRC_DIR ${gsl_SOURCE_DIR})
+
+include_directories(${GSL_SRC_DIR}/include)
 
 add_library(klvp STATIC)
 

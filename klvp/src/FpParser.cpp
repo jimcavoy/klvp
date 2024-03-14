@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 #ifdef WIN32
 #include <winsock2.h>
 #else

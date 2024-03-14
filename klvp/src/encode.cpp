@@ -4,8 +4,10 @@
 #ifdef WIN32
 #include <Rpc.h>
 #else
+#include <cstring>
 #include <netinet/in.h>
 #include <uuid/uuid.h>
+#include <cmath>
 
 uint64_t htonll(uint64_t value)
 {

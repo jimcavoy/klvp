@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-#define MAX_DATA BUFSIZ
+#define MAX_DATA 512
 
 /// <summary>
 /// 
