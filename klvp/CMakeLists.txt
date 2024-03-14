@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.21)
+cmake_minimum_required (VERSION 3.26)
 
 project(klvp
     VERSION 1.0.0
@@ -91,7 +91,7 @@ endif()
 
 target_link_libraries(klvp
     PRIVATE ${WS}
-    INTERFACE $<INSTALL_INTERFACE:Microsoft.GSL::GSL>
+    INTERFACE $<BUILD_LOCAL_INTERFACE:Microsoft.GSL::GSL>
 )
 
 target_include_directories(klvp
