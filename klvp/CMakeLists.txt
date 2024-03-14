@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 3.21)
+
 project(klvp
     VERSION 1.0.0
     DESCRIPTION "STANAG 4609 ST 0601 KLV parser library"
@@ -43,33 +44,35 @@ FetchContent_Declare(GSL
 
 FetchContent_MakeAvailable(GSL)
 
+FetchContent_GetProperties(GSL)
+
 add_library(klvp STATIC)
 
-target_sources(klvp PRIVATE 
-	src/decode.cpp
-	src/encode.cpp
-	src/FpParser.cpp
-	src/klvelmt.cpp
-	src/klvelmtimpl.cpp
-	src/klvelmtparse.cpp
-	src/klvprsr.cpp
-	src/KlvSizeVisitor.cpp
-	src/klvsselmtimpl.cpp
-	src/klvsselmtparse.cpp
-	src/klvuselmtimpl.cpp
-	src/util.cpp
-	include/klvp/decode.h
-	include/klvp/encode.h
-	include/klvp/FpParser.h
-	include/klvp/klvelmt.h
-	include/klvp/klvelmtimpl.h
-	include/klvp/klvprsr.h
-	include/klvp/KlvSizeVisitor.h
-	include/klvp/klvsselmtimpl.h
-	include/klvp/klvuselmtimpl.h
-	include/klvp/RawSerializedVisitor.h
-	include/klvp/treenode.h
-	include/klvp/util.h
+target_sources(klvp PRIVATE
+    src/decode.cpp
+    src/encode.cpp
+    src/FpParser.cpp
+    src/klvelmt.cpp
+    src/klvelmtimpl.cpp
+    src/klvelmtparse.cpp
+    src/klvprsr.cpp
+    src/KlvSizeVisitor.cpp
+    src/klvsselmtimpl.cpp
+    src/klvsselmtparse.cpp
+    src/klvuselmtimpl.cpp
+    src/util.cpp
+    include/klvp/decode.h
+    include/klvp/encode.h
+    include/klvp/FpParser.h
+    include/klvp/klvelmt.h
+    include/klvp/klvelmtimpl.h
+    include/klvp/klvprsr.h
+    include/klvp/KlvSizeVisitor.h
+    include/klvp/klvsselmtimpl.h
+    include/klvp/klvuselmtimpl.h
+    include/klvp/RawSerializedVisitor.h
+    include/klvp/treenode.h
+    include/klvp/util.h
 )
 
 set_property(TARGET klvp PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -86,9 +89,9 @@ if(WIN32)
     set(WS wsock32 ws2_32)
 endif()
 
-target_link_libraries(klvp 
+target_link_libraries(klvp
     PRIVATE ${WS}
-    INTERFACE Microsoft.GSL::GSL
+    INTERFACE $<INSTALL_INTERFACE:Microsoft.GSL::GSL>
 )
 
 target_include_directories(klvp
@@ -97,7 +100,7 @@ target_include_directories(klvp
     INTERFACE $<BUILD_INTERFACE:${LOKI_DIR}/include>
 )
 
-install(TARGETS klvp
+install (TARGETS klvp
     EXPORT klvp_export
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
