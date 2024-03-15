@@ -22,8 +22,6 @@ ExternalProject_Get_Property(sqlite3 SOURCE_DIR)
 
 set(SQLITE3_DIR "${SOURCE_DIR}")
 
-include_directories(${SQLITE3_DIR}/src)
-
 add_library(ldsdb STATIC)
 
 target_sources(ldsdb PRIVATE
@@ -42,4 +40,7 @@ target_compile_features(
 target_include_directories(ldsdb
     PRIVATE src/ldsdb
     PUBLIC include
+    PRIVATE $<BUILD_INTERFACE:${SQLITE3_DIR}/src>
 )
+
+install(TARGETS ldsdb)

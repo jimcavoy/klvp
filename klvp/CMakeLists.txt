@@ -9,7 +9,7 @@ include(GNUInstallDirs)
 
 # This is the default install directory for config-file package cmake files
 # It is relative to install prefix.
-set(klvp_INSTALL_CMAKEDIR cmake CACHE PATH "Installation directory for config-file package cmake files")
+set(klvp_INSTALL_CMAKEDIR lib/cmake/klvp CACHE PATH "Installation directory for config-file package cmake files")
 
 # set the postfix "d" for the resulting .so or .dll files when building the
 # library in debug mode
@@ -32,8 +32,6 @@ ExternalProject_Get_Property(loki-lib SOURCE_DIR)
 
 set(LOKI_DIR "${SOURCE_DIR}")
 
-include_directories(${LOKI_DIR}/include)
-
 include(FetchContent)
 
 FetchContent_Declare(GSL
@@ -46,7 +44,7 @@ FetchContent_MakeAvailable(GSL)
 
 set(GSL_SRC_DIR ${gsl_SOURCE_DIR})
 
-include_directories(${GSL_SRC_DIR}/include)
+#include_directories(${GSL_SRC_DIR}/include)
 
 add_library(klvp STATIC)
 
@@ -99,7 +97,7 @@ target_link_libraries(klvp
 target_include_directories(klvp
     PRIVATE src/klvp
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    INTERFACE $<BUILD_INTERFACE:${LOKI_DIR}/include>
+    PUBLIC $<BUILD_INTERFACE:${LOKI_DIR}/include>
 )
 
 install (TARGETS klvp
