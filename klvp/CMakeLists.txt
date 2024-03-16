@@ -8,10 +8,6 @@ project(klvp
 
 include(GNUInstallDirs)
 
-# This is the default install directory for config-file package cmake files
-# It is relative to install prefix.
-set(klvp_INSTALL_CMAKEDIR lib/cmake/klvp CACHE PATH "Installation directory for config-file package cmake files")
-
 # set the postfix "d" for the resulting .so or .dll files when building the
 # library in debug mode
 set(CMAKE_DEBUG_POSTFIX d)
@@ -20,8 +16,7 @@ set(CMAKE_DEBUG_POSTFIX d)
 include(ExternalProject)
 
 # Add an external project from a downloaded source archive
-ExternalProject_Add(
-  loki-lib
+ExternalProject_Add(loki-lib
   URL https://github.com/snaewe/loki-lib/archive/refs/tags/Release_0_1_5.tar.gz
   URL_HASH MD5=74e60c683f745dc15c6e772927349483
   CONFIGURE_COMMAND ""
@@ -33,19 +28,7 @@ ExternalProject_Get_Property(loki-lib SOURCE_DIR)
 
 set(LOKI_DIR "${SOURCE_DIR}")
 
-include(FetchContent)
-
-FetchContent_Declare(GSL
-    GIT_REPOSITORY https://github.com/microsoft/GSL.git
-    GIT_TAG "v4.0.0"
-    GIT_SHALLOW ON
-)
-
-FetchContent_MakeAvailable(GSL)
-
-set(GSL_SRC_DIR ${gsl_SOURCE_DIR})
-
-#include_directories(${GSL_SRC_DIR}/include)
+find_package(Microsoft.GSL CONFIG REQUIRED)
 
 add_library(klvp STATIC)
 
@@ -82,10 +65,7 @@ set_property(TARGET klvp PROPERTY POSITION_INDEPENDENT_CODE ON)
 add_dependencies(klvp loki-lib)
 
 # specify the C++ standard
-target_compile_features(
-    klvp
-    PUBLIC cxx_std_14
-)
+target_compile_features( klvp PUBLIC cxx_std_14)
 
 target_link_libraries(klvp
   INTERFACE
@@ -93,10 +73,7 @@ target_link_libraries(klvp
 )
 
 if (WIN32)
-target_link_libraries(klvp
-  PRIVATE
-    wsock32 ws2_32
-)
+target_link_libraries(klvp PRIVATE wsock32 ws2_32)
 endif()
 
 target_include_directories(klvp
@@ -108,19 +85,19 @@ target_include_directories(klvp
 )
 
 install (TARGETS klvp
-    EXPORT klvp_export
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  EXPORT klvp_export
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 install (
-    DIRECTORY ${PROJECT_SOURCE_DIR}/include/
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+  DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+  DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
 install (EXPORT klvp_export
-    FILE klvp-config.cmake
-    NAMESPACE lcss::
-    DESTINATION lib/cmake/klvp
+  FILE klvp-config.cmake
+  NAMESPACE lcss::
+  DESTINATION lib/cmake/klvp
 )
 
 # Defines write_basic_package_version_file
@@ -133,6 +110,7 @@ include(CMakePackageConfigHelpers)
 # get it from project(...) version (which is 1.0.0)
 write_basic_package_version_file(
   "klvp-config-version.cmake"
+  VERSION ${klvp_VERSION}
   # Package compatibility strategy. SameMajorVersion is essentially `semantic versioning`.
   COMPATIBILITY SameMajorVersion
 )

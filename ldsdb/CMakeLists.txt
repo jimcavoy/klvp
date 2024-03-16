@@ -6,21 +6,7 @@ project(ldsdb
   LANGUAGES C CXX
 )
 
-include(GNUInstallDirs)
-
-# include the module `ExternalProject`
-include(ExternalProject)
-
-# Add an external project from a downloaded source archive
-ExternalProject_Add( sqlite3
-  URL https://github.com/alex85k/sqlite3-cmake/archive/refs/tags/v3.24.0.tar.gz
-  URL_HASH MD5=15ab81bf8cfbdb9a9a3b3abd38c7598b
-  BUILD_IN_SOURCE true
-)
-
-ExternalProject_Get_Property(sqlite3 SOURCE_DIR)
-
-set(SQLITE3_DIR "${SOURCE_DIR}")
+find_package(unofficial-sqlite3 CONFIG REQUIRED)
 
 add_library(ldsdb STATIC)
 
@@ -33,17 +19,15 @@ target_sources(ldsdb
 set_property(TARGET ldsdb PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # specify the C++ standard
-target_compile_features( ldsdb
-  PUBLIC 
-    cxx_std_14
-)
+target_compile_features( ldsdb PUBLIC cxx_std_14)
 
 target_include_directories(ldsdb
   PUBLIC
     include
   PRIVATE
     src/ldsdb
-    $<BUILD_INTERFACE:${SQLITE3_DIR}/src>
 )
+
+target_link_libraries(ldsdb PRIVATE unofficial::sqlite3::sqlite3)
 
 install(TARGETS ldsdb)
