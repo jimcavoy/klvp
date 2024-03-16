@@ -4,19 +4,20 @@
 cmake_minimum_required (VERSION 3.21)
 
 project (klvp
-	VERSION 1.0.0
-	DESCRIPTION "STANAG 4609 ST 0601 KLV Parser Library"
-	LANGUAGES C CXX
+  VERSION 1.0.0
+  DESCRIPTION "STANAG 4609 ST 0601 KLV Parser Library"
+  LANGUAGES C CXX
 )
 
 # Include sub-projects.
 add_subdirectory (klvp)
 add_subdirectory (ldsdb)
 
-# Create an app that reads KLV encode stream and outputs XML representation.
+# Create an app, klv2xml, that reads KLV encode stream and outputs XML representation.
 add_executable(klv2xml)
 
-target_sources(klv2xml PRIVATE
+target_sources(klv2xml
+  PRIVATE
     src/klvp.h
     src/klvp.cpp
     src/KLVPrintVisitor.h
@@ -29,11 +30,18 @@ target_sources(klv2xml PRIVATE
     src/TestKLVSecuritySetParser.cpp
 )
 
-if(NOT WIN32)
-    list(APPEND EXTRA_LIBS uuid)
-endif()
+target_link_libraries(klv2xml
+  PRIVATE
+    klvp
+    ldsdb
+)
 
-target_link_libraries(klv2xml PRIVATE klvp ldsdb ${EXTRA_LIBS})
+if(NOT WIN32)
+target_link_libraries(klv2xml
+  PRIVATE
+    uuid
+)
+endif()
 
 # install
 install (TARGETS klv2xml)
@@ -41,9 +49,9 @@ install (TARGETS klv2xml)
 # Test cases
 enable_testing()
 
-set(args ${PROJECT_SOURCE_DIR}/sample/svt_testset_420_720p50_klved_4774.klv ${PROJECT_SOURCE_DIR}/data/klv.s3db)
 add_test(NAME read_test 
-    COMMAND klv2xml ${args}
+  COMMAND klv2xml ${PROJECT_SOURCE_DIR}/sample/svt_testset_420_720p50_klved_4774.klv ${PROJECT_SOURCE_DIR}/data/klv.s3db
 )
 set_tests_properties(read_test
-    PROPERTIES PASS_REGULAR_EXPRESSION "KLV count = 2503")
+  PROPERTIES PASS_REGULAR_EXPRESSION "KLV count = 2503"
+)

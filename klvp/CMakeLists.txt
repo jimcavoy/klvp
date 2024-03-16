@@ -1,9 +1,10 @@
 cmake_minimum_required (VERSION 3.26)
 
 project(klvp
-    VERSION 1.0.0
-    DESCRIPTION "STANAG 4609 ST 0601 KLV parser library"
-    LANGUAGES C CXX)
+  VERSION 1.0.0
+  DESCRIPTION "STANAG 4609 ST 0601 KLV parser library"
+  LANGUAGES C CXX
+)
 
 include(GNUInstallDirs)
 
@@ -48,7 +49,8 @@ set(GSL_SRC_DIR ${gsl_SOURCE_DIR})
 
 add_library(klvp STATIC)
 
-target_sources(klvp PRIVATE
+target_sources(klvp
+  PRIVATE
     src/decode.cpp
     src/encode.cpp
     src/FpParser.cpp
@@ -85,19 +87,24 @@ target_compile_features(
     PUBLIC cxx_std_14
 )
 
-if(WIN32)
-    set(WS wsock32 ws2_32)
-endif()
-
 target_link_libraries(klvp
-    PRIVATE ${WS}
-    INTERFACE $<BUILD_LOCAL_INTERFACE:Microsoft.GSL::GSL>
+  INTERFACE
+    $<BUILD_LOCAL_INTERFACE:Microsoft.GSL::GSL>
 )
 
+if (WIN32)
+target_link_libraries(klvp
+  PRIVATE
+    wsock32 ws2_32
+)
+endif()
+
 target_include_directories(klvp
-    PRIVATE src/klvp
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    PUBLIC $<BUILD_INTERFACE:${LOKI_DIR}/include>
+  PRIVATE 
+    src/klvp
+  PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${LOKI_DIR}/include>
 )
 
 install (TARGETS klvp
@@ -113,7 +120,7 @@ install (
 install (EXPORT klvp_export
     FILE klvp-config.cmake
     NAMESPACE lcss::
-    DESTINATION ${klvp_INSTALL_CMAKEDIR}
+    DESTINATION lib/cmake/klvp
 )
 
 # Defines write_basic_package_version_file
@@ -134,5 +141,5 @@ write_basic_package_version_file(
 # in the same directory as `klvp-config.cmake` file.
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/klvp-config-version.cmake"
-  DESTINATION "${klvp_INSTALL_CMAKEDIR}"
+  DESTINATION lib/cmake/klvp
 )
