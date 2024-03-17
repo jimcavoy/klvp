@@ -67,10 +67,7 @@ add_dependencies(klvp loki-lib)
 # specify the C++ standard
 target_compile_features( klvp PUBLIC cxx_std_14)
 
-target_link_libraries(klvp
-  INTERFACE
-    $<BUILD_LOCAL_INTERFACE:Microsoft.GSL::GSL>
-)
+target_link_libraries(klvp PUBLIC Microsoft.GSL::GSL)
 
 if (WIN32)
 target_link_libraries(klvp PRIVATE wsock32 ws2_32)
