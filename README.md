@@ -9,7 +9,7 @@ This project requires the following to be installed:
 2. Microsoft Guidelines Support Library (GSL), https://github.com/microsoft/GSL 
 3. SQLite3, https://github.com/sqlite/sqlite
 
-It is recommended to use a package managment system such as [vcpkg](https://github.com/microsoft/vcpkg) to download and install __GSL__ and __SQLite3__.
+It is recommended to use a package management system such as [vcpkg](https://github.com/microsoft/vcpkg) to download and install __GSL__ and __SQLite3__.
 
 ## To Build and Install
 In __klvp__ root directory, build and install this project using CMake with the following commmands on a terminal:
