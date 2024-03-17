@@ -17,7 +17,11 @@ In __klvp__ root directory, build and install this project using CMake with the 
 ### 1. Generate the build environment
     cmake -S . -B ./build 
     
-If you installed __GSL__ and __SQLite3__ using __vcpkg__, you may need to add `-DCMAKE_PREFIX_PATH=[vcpkg root]/installed/[target]` as an argument to the above command. 
+If you installed __GSL__ and __SQLite3__ using __vcpkg__, you may need to add 
+
+    -DCMAKE_PREFIX_PATH=[vcpkg root]/installed/[target]
+    
+as an argument to the above __cmake__ command. 
 The `[target]` is the target machine architecture such as `x64-windows` or `x64-linux`.
 
 ### 2. Build the library and test application
