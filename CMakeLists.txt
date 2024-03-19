@@ -46,6 +46,8 @@ install (TARGETS klv2xml)
 # Test cases
 enable_testing()
 
+add_subdirectory (tests)
+
 add_test(NAME read_test 
   COMMAND klv2xml ${PROJECT_SOURCE_DIR}/sample/svt_testset_420_720p50_klved_4774.klv ${PROJECT_SOURCE_DIR}/data/klv.s3db
 )
