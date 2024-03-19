@@ -71,6 +71,8 @@ target_link_libraries(klvp PUBLIC Microsoft.GSL::GSL)
 
 if (WIN32)
 target_link_libraries(klvp PRIVATE wsock32 ws2_32)
+else()
+target_link_libraries(klvp PRIVATE uuid)
 endif()
 
 target_include_directories(klvp
