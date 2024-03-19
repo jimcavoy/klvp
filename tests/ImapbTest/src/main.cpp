@@ -5,6 +5,8 @@
 #include <klvp/FpParser.h>
 #include <iostream>
 #include <iomanip>
+#include <cmath>
+#include <cstring>
 
 #define LEN 3
 
@@ -12,8 +14,7 @@ int main()
 {
 	using namespace std;
 
-	unsigned char buffer[LEN];
-	memset(buffer, 0, LEN);
+	unsigned char buffer[LEN]{};
 	double dValue = 13898.5463;
 
 	// MISB ST 0601 Tag 96 Target Width Extended example

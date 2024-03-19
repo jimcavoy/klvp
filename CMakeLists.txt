@@ -36,10 +36,6 @@ target_link_libraries(klv2xml
     ldsdb
 )
 
-if(NOT WIN32)
-target_link_libraries(klv2xml PRIVATE uuid)
-endif()
-
 # install
 install (TARGETS klv2xml)
 
