@@ -39,6 +39,10 @@ target_link_libraries(klv2xml
 # install
 install (TARGETS klv2xml)
 
+install (FILES ${PROJECT_SOURCE_DIR}/data/klv.s3db
+  TYPE DATA
+)
+
 # Test cases
 enable_testing()
 
