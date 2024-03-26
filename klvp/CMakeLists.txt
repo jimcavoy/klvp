@@ -77,7 +77,8 @@ endif()
 
 target_include_directories(klvp
   PRIVATE 
-    src/klvp
+    src
+    include/klvp
   PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${LOKI_DIR}/include>
@@ -98,6 +99,10 @@ install (EXPORT klvp_export
   NAMESPACE lcss::
   DESTINATION lib/cmake/klvp
 )
+
+if (WIN32)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/klvpd.pdb DESTINATION lib OPTIONAL)
+endif()
 
 # Defines write_basic_package_version_file
 include(CMakePackageConfigHelpers)

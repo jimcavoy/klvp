@@ -1,5 +1,5 @@
-#include <klvp/klvprsr.h>
-#include <klvp/util.h>
+#include "klvprsr.h"
+#include "util.h"
 
 #include <cstdint>
 #ifdef WIN32

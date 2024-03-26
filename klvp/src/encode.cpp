@@ -1,5 +1,5 @@
-#include <klvp/encode.h>
-#include <klvp/FpParser.h>
+#include "encode.h"
+#include "FpParser.h"
 
 #ifdef WIN32
 #include <Rpc.h>
