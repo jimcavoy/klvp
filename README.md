@@ -3,26 +3,19 @@ STANAG 4609 ST 0601 Key-Length-Value (KLV) parser library and test application, 
 which reads in KLV encoded stream and writes out an XML representation.
 
 ## Prerequisites
-This project requires the following to be installed:
+This project requires the following:
 
-1. CMake, https://cmake.org/
-2. Microsoft Guidelines Support Library (GSL), https://github.com/microsoft/GSL 
-3. SQLite3, https://github.com/sqlite/sqlite
-
-It is recommended to use a package management system such as [vcpkg](https://github.com/microsoft/vcpkg) to download and install __GSL__ and __SQLite3__.
+1. Install CMake, https://cmake.org/
+2. Install vcpkg, https://github.com/microsoft/vcpkg, which is a packet management system.
+3. Configure `VCPKG_ROOT` environment variable to the path where you installed __vcpkg__.
 
 ## To Build and Install
 In __klvp__ root directory, build and install this project using CMake with the following commmands on a terminal:
 
 ### 1. Generate the build environment
-    cmake -S . -B ./build 
-    
-If you installed __GSL__ and __SQLite3__ using __vcpkg__, you may need to add 
+    cmake --preset=<windows-base|linux-base>
 
-    -DCMAKE_PREFIX_PATH=[vcpkg root]/installed/[target]
-    
-as an argument to the above __cmake__ command. 
-The `[target]` is the target machine architecture such as `x64-windows` or `x64-linux`.
+For Windows platform, use `window-base` and for Linux platform use `linux-base` preset.
 
 ### 2. Build the library and test application
     cmake --build ./build 
