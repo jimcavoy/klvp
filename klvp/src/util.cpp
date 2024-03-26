@@ -1,6 +1,6 @@
-#include <klvp/util.h>
-#include <klvp/KlvSizeVisitor.h>
-#include <klvp/treenode.h>
+#include "util.h"
+#include "KlvSizeVisitor.h"
+#include "treenode.h"
 
 #ifdef _WIN32
 #include <WinSock2.h>

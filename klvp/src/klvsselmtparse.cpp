@@ -1,6 +1,6 @@
-#include <klvp/klvelmt.h>
-#include <klvp/klvsselmtimpl.h>
-#include <klvp/decode.h>
+#include "klvelmt.h"
+#include "klvsselmtimpl.h"
+#include "decode.h"
 
 // klvsslex generated on Thu Aug 15 09:15:01 2013
 

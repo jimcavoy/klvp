@@ -32,6 +32,7 @@ target_include_directories(ldsdb
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   PRIVATE
     src
+    include/ldsdb
 )
 
 target_link_libraries(ldsdb PRIVATE unofficial::sqlite3::sqlite3)
@@ -53,6 +54,10 @@ install (EXPORT ldsdb_export
   NAMESPACE lcss::
   DESTINATION lib/cmake/ldsdb
 )
+
+if (WIN32)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/ldsdbd.pdb DESTINATION lib OPTIONAL)
+endif()
 
 # Defines write_basic_package_version_file
 include(CMakePackageConfigHelpers)

@@ -1,6 +1,6 @@
-#include <klvp/klvelmt.h>
-#include <klvp/klvelmtimpl.h>
-#include <klvp/klvuselmtimpl.h>
+#include "klvelmt.h"
+#include "klvelmtimpl.h"
+#include "klvuselmtimpl.h"
 
 lcss::KLVElement::KLVElement()
 {
