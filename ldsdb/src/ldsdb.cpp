@@ -101,7 +101,7 @@ static void create_sqlstmt(char* stmt, size_t sz, const LDSEntry& entry)
 #else
 	sprintf(no, "%d", value);
 	strcat(stmt, no);
-	strcat(stmt, "\n");
+	strcat(stmt, ")\n");
 #endif
 }
 
@@ -172,7 +172,6 @@ void LDSDatabase::fetch(LDSEntry* entry)
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
 		throw std::runtime_error(msg.c_str());
@@ -190,7 +189,6 @@ void LDSDatabase::fetch_security(LDSEntry* entry)
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
 		throw std::runtime_error(msg.c_str());
@@ -375,7 +373,6 @@ size_t LDSDatabase::fetch_list(T back_inserter)
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
 		throw std::runtime_error(msg.c_str());
@@ -397,7 +394,6 @@ size_t fetch_security_elements(sqlite3* db, T backInsertIt)
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
 		throw std::runtime_error(msg.c_str());
@@ -463,7 +459,6 @@ size_t LDSDatabase::fetch_security_elements_validvalues(T first, T last)
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
 		throw std::runtime_error(msg.c_str());
@@ -532,7 +527,6 @@ size_t LDSDatabase::fetch_list_rights(T backInsertIt, const char* countryCode)
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
 		throw std::runtime_error(msg.c_str());
@@ -557,7 +551,6 @@ size_t LDSDatabase::fetch_security_list_rights(T backInsertIt, const char* count
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
 		throw std::runtime_error(msg.c_str());

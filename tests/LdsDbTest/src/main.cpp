@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 	}
 	catch (const std::exception& ex)
 	{
-		cerr << ex.what();
+		cerr << "*** ERROR: " << ex.what() << " ***" << endl;
 		return -1;
 	}
 
