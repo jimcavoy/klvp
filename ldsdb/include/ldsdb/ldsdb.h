@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-#define MAX_DATA 512
+#define MAX_DATA 128
 
 /// <summary>
 /// 
@@ -47,6 +47,7 @@ struct LDSEntry
 	char	name[MAX_DATA];
 	char	units[MAX_DATA];
 	char	format[MAX_DATA];
+	char	symbol[MAX_DATA];
 	char	description[MAX_DATA];
 
 	valueCollection validValues;
@@ -79,16 +80,6 @@ public:
 
 	template<class T> size_t fetch_list_rights(T backInsertIt, const char* countryCode);
 	template<class T> size_t fetch_security_list_rights(T backInsertIt, const char* countryCode);
-
-private:
-	void create_sqlstmt(char* stmt, size_t sz, const LDSEntry& entry);
-	void create_security_sqlstmt(char* stmt, size_t sz, const LDSEntry& entry);
-	/// <summary>
-	/// Fetches the security elements.
-	/// </summary>
-	/// <param name="backInsertIt">The back inserter iterator.</param>
-	/// <returns></returns>
-	template<class T> size_t fetch_security_elements(T backInsertIt);
 
 private:
 	class Impl;
