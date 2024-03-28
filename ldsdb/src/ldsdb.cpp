@@ -6,6 +6,7 @@
 #include <map>
 #include <cstdint>
 #include <cstring>
+#include <stdexcept>
 
 #ifndef WIN32
 #define strcpy_s strcpy
@@ -75,9 +76,9 @@ bool LDSDatabase::is_open() const
 }
 
 
-void LDSDatabase::create_sqlstmt(char* stmt, size_t sz, const LDSEntry& entry)
+static void create_sqlstmt(char* stmt, size_t sz, const LDSEntry& entry)
 {
-	const char* select = "select Name, Units, Format, Description from UasLds where (";
+	const char* select = "select Name, Units, Format, Description, Length, Symbol from UasLds where (";
 #ifdef WIN32
 	strcpy_s(stmt, sz, select);
 #else
@@ -96,19 +97,17 @@ void LDSDatabase::create_sqlstmt(char* stmt, size_t sz, const LDSEntry& entry)
 #ifdef WIN32
 	sprintf_s(no, "%d", value);
 	strcat_s(stmt, sz, no);
-	strcat_s(stmt, sz, "\n)");
+	strcat_s(stmt, sz, ")\n");
 #else
 	sprintf(no, "%d", value);
 	strcat(stmt, no);
-	strcat(stmt, "\n");
+	strcat(stmt, ")\n");
 #endif
-
-	
 }
 
-void LDSDatabase::create_security_sqlstmt(char* stmt, size_t sz, const LDSEntry& entry)
+static void create_security_sqlstmt(char* stmt, size_t sz, const LDSEntry& entry)
 {
-	const char* select = "select Name, Units, Format from SecurityLds where (";
+	const char* select = "select Name, Units, Format, Length from SecurityLds where (";
 	char no[6]{};
 	uint16_t value = 0;
 	value = (uint16_t)entry.key;
@@ -118,7 +117,7 @@ void LDSDatabase::create_security_sqlstmt(char* stmt, size_t sz, const LDSEntry&
 	strcat_s(stmt, sz, "Key=");
 	sprintf_s(no, "%d", value);
 	strcat_s(stmt, sz, no);
-	strcat_s(stmt, sz, "\n)");
+	strcat_s(stmt, sz, ")\n");
 #else
 	strcpy(stmt, select);
 	strcat(stmt, "Key=");
@@ -136,19 +135,27 @@ static int fetch_callback(void* data, int argc, char** argv, char** azColName)
 	{
 		if (strcmp(azColName[i], "Name") == 0)
 		{
-			strcpy_s(entry->name, argv[i]);
+			strcpy(entry->name, argv[i]);
 		}
 		else if (strcmp(azColName[i], "Units") == 0)
 		{
-			strcpy_s(entry->units, argv[i]);
+			strcpy(entry->units, argv[i]);
 		}
 		else if (strcmp(azColName[i], "Format") == 0)
 		{
-			strcpy_s(entry->format, argv[i]);
+			strcpy(entry->format, argv[i]);
+		}
+		else if (strcmp(azColName[i], "Symbol") == 0)
+		{
+			strcpy(entry->symbol, argv[i]);
+		}
+		else if (strcmp(azColName[i], "Length") == 0)
+		{
+			entry->length = atoi(argv[i]);
 		}
 		else if (strcmp(azColName[i], "Description") == 0 && argv[i] != nullptr)
 		{
-			strcpy_s(entry->description, argv[i]);
+			strcpy(entry->description, argv[i]);
 		}
 	}
 	return 0;
@@ -165,8 +172,9 @@ void LDSDatabase::fetch(LDSEntry* entry)
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
+		throw std::runtime_error(msg.c_str());
 	}
 }
 
@@ -181,10 +189,10 @@ void LDSDatabase::fetch_security(LDSEntry* entry)
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
+		throw std::runtime_error(msg.c_str());
 	}
-
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -205,9 +213,9 @@ ValidValue::~ValidValue()
 
 ValidValue::ValidValue(const ValidValue& orig)
 {
-	strcpy_s(displayName, orig.displayName);
-	strcpy_s(value, orig.value);
-	strcpy_s(codingMethod, orig.codingMethod);
+	strcpy(displayName, orig.displayName);
+	strcpy(value, orig.value);
+	strcpy(codingMethod, orig.codingMethod);
 }
 
 ValidValue& ValidValue::operator=(const ValidValue& rhs)
@@ -235,6 +243,7 @@ LDSEntry::LDSEntry()
 	, name{}
 	, units{}
 	, format{}
+	, symbol{}
 	, description{}
 {
 
@@ -246,10 +255,11 @@ LDSEntry::LDSEntry(const LDSEntry& orig)
 	length = orig.length;
 	permission = orig.permission;
 
-	strcpy_s(name, orig.name);
-	strcpy_s(units, orig.units);
-	strcpy_s(format, orig.format);
-	strcpy_s(description, orig.description);
+	strcpy(name, orig.name);
+	strcpy(units, orig.units);
+	strcpy(format, orig.format);
+	strcpy(symbol, orig.symbol);
+	strcpy(description, orig.description);
 
 	std::copy(orig.validValues.begin(), orig.validValues.end(), std::back_inserter(validValues));
 }
@@ -277,6 +287,7 @@ LDSEntry& LDSEntry::operator=(LDSEntry&& rhs) noexcept
 		std::move(rhs.name, rhs.name + MAX_DATA, name);
 		std::move(rhs.units, rhs.units + MAX_DATA, units);
 		std::move(rhs.format, rhs.format + MAX_DATA, format);
+		std::move(rhs.symbol, rhs.symbol + MAX_DATA, symbol);
 		std::move(rhs.description, rhs.description + MAX_DATA, description);
 
 		std::move(rhs.validValues.begin(), rhs.validValues.end(), std::back_inserter(validValues));
@@ -302,6 +313,7 @@ void LDSEntry::swap(LDSEntry& orig)
 	std::swap(name, orig.name);
 	std::swap(units, orig.units);
 	std::swap(format, orig.format);
+	std::swap(symbol, orig.symbol);
 	std::swap(description, orig.description);
 
 	std::swap(validValues, orig.validValues);
@@ -319,23 +331,27 @@ static int fetch_list_callback(void* data, int argc, char** argv, char** azColNa
 		}
 		else if (strcmp(azColName[i], "Name") == 0)
 		{
-			strcpy_s(entry.name, argv[i]);
+			strcpy(entry.name, argv[i]);
 		}
 		else if (strcmp(azColName[i], "Units") == 0)
 		{
-			strcpy_s(entry.units, argv[i]);
+			strcpy(entry.units, argv[i]);
 		}
 		else if (strcmp(azColName[i], "Format") == 0)
 		{
-			strcpy_s(entry.format, argv[i]);
+			strcpy(entry.format, argv[i]);
 		}
 		else if (strcmp(azColName[i], "Length") == 0)
 		{
 			entry.length = atoi(argv[i]);
 		}
+		else if (strcmp(azColName[i], "Symbol") == 0)
+		{
+			strcpy(entry.symbol, argv[i]);
+		}
 		else if (strcmp(azColName[i], "Description") == 0)
 		{
-			strcpy_s(entry.description, argv[i]);
+			strcpy(entry.description, argv[i]);
 		}
 	}
 	vec->push_back(entry);
@@ -350,16 +366,16 @@ size_t LDSDatabase::fetch_list(T back_inserter)
 {
 	int rc = 0;
 	char* zErrMsg;
-	const char* cmdstr = "select Key, Name, Units, Format, Length, Description from UasLds;";
+	const char* cmdstr = "select Key, Name, Units, Format, Length, Symbol, Description from UasLds;";
 	std::vector<LDSEntry> res;
 
 	rc = sqlite3_exec(_pimpl->_db, cmdstr, fetch_list_callback, (void*)&res, &zErrMsg);
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
-		return 0;
+		throw std::runtime_error(msg.c_str());
 	}
 
 	std::copy(res.begin(), res.end(), back_inserter);
@@ -367,9 +383,29 @@ size_t LDSDatabase::fetch_list(T back_inserter)
 }
 
 template<class T>
+size_t fetch_security_elements(sqlite3* db, T backInsertIt)
+{
+	int rc = 0;
+	char* zErrMsg;
+	const char* cmdstr = "select Key, Name, Units, Format, Length from Securitylds;";
+	std::vector<LDSEntry> res;
+
+	rc = sqlite3_exec(db, cmdstr, fetch_list_callback, (void*)&res, &zErrMsg);
+
+	if (rc != SQLITE_OK)
+	{
+		std::string msg(zErrMsg);
+		sqlite3_free(zErrMsg);
+		throw std::runtime_error(msg.c_str());
+	}
+	std::copy(res.begin(), res.end(), backInsertIt);
+	return res.size();
+}
+
+template<class T>
 size_t LDSDatabase::fetch_security_list(T backInsertIt)
 {
-	size_t ret = fetch_security_elements(backInsertIt);
+	size_t ret = fetch_security_elements(_pimpl->_db, backInsertIt);
 	return ret;
 }
 
@@ -423,9 +459,9 @@ size_t LDSDatabase::fetch_security_elements_validvalues(T first, T last)
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
-		return 0;
+		throw std::runtime_error(msg.c_str());
 	}
 
 	for (T it = first; it != last; ++it)
@@ -441,26 +477,6 @@ size_t LDSDatabase::fetch_security_elements_validvalues(T first, T last)
 	return mapVv.size();
 }
 
-
-template<class T>
-size_t LDSDatabase::fetch_security_elements(T backInsertIt)
-{
-	int rc = 0;
-	char* zErrMsg;
-	const char* cmdstr = "select Key, Name, Units, Format, Length from Securitylds;";
-	std::vector<LDSEntry> res;
-
-	rc = sqlite3_exec(_pimpl->_db, cmdstr, fetch_list_callback, (void*)&res, &zErrMsg);
-
-	if (rc != SQLITE_OK)
-	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
-		sqlite3_free(zErrMsg);
-		return 0;
-	}
-	std::copy(res.begin(), res.end(), backInsertIt);
-	return res.size();
-}
 
 static int fetch_list_rights_callback(void* data, int argc, char** argv, char** azColName)
 {
@@ -511,9 +527,9 @@ size_t LDSDatabase::fetch_list_rights(T backInsertIt, const char* countryCode)
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
-		return 0;
+		throw std::runtime_error(msg.c_str());
 	}
 
 	std::copy(res.begin(), res.end(), backInsertIt);
@@ -535,9 +551,9 @@ size_t LDSDatabase::fetch_security_list_rights(T backInsertIt, const char* count
 
 	if (rc != SQLITE_OK)
 	{
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		std::string msg(zErrMsg);
 		sqlite3_free(zErrMsg);
-		return 0;
+		throw std::runtime_error(msg.c_str());
 	}
 
 	std::copy(res.begin(), res.end(), backInsertIt);
@@ -549,6 +565,5 @@ size_t LDSDatabase::fetch_security_list_rights(T backInsertIt, const char* count
 template size_t LDSDatabase::fetch_list<std::back_insert_iterator<std::vector<LDSEntry>>>(std::back_insert_iterator<std::vector<LDSEntry>>);
 template size_t LDSDatabase::fetch_security_list<std::back_insert_iterator<std::vector<LDSEntry>>>(std::back_insert_iterator<std::vector<LDSEntry>>);
 template size_t LDSDatabase::fetch_security_elements_validvalues<std::vector<LDSEntry>::iterator>(std::vector<LDSEntry>::iterator, std::vector<LDSEntry>::iterator);
-template size_t LDSDatabase::fetch_security_elements<std::back_insert_iterator<std::vector<LDSEntry>> >(std::back_insert_iterator<std::vector<LDSEntry>>);
 template size_t LDSDatabase::fetch_list_rights<std::back_insert_iterator<std::vector<LDSEntry>>>(std::back_insert_iterator<std::vector<LDSEntry>>, const char*);
 template size_t LDSDatabase::fetch_security_list_rights<std::back_insert_iterator<std::vector<LDSEntry>>>(std::back_insert_iterator<std::vector<LDSEntry>>, const char*);
