@@ -13,7 +13,8 @@ namespace lcss
 
 /////////////////////////////////////////////////////////////////////////////
 // KLVElement
-// KLVElement is a handle class
+
+/// @brief KLVElement is a handle class
 class KLVElement
 {
 public:
@@ -35,6 +36,8 @@ public:
 
 	void swap(KLVElement& src);
 
+	/// @brief Accept an instance of a Visitor class.  See Visitor Pattern.
+	/// @param visitor [in, out] An instance of a Visitor class.
 	void Accept(Loki::BaseVisitor& visitor);
 
 	/// <summary>
@@ -53,6 +56,8 @@ public:
 	/// return the number of bytes without filling input parameter.</returns>
 	int key(uint8_t* key) const;
 
+	/// @brief The number of bytes of the value.
+	/// @return Returns the number of bytes used to encode a value.
 	int length() const;
 
 	/// <summary>
@@ -64,16 +69,41 @@ public:
 	///  return 0 for error.</returns>
 	int numOfBytesForLength() const;
 
-	void value(uint8_t*) const;
+	/// @brief Get the encoded value.
+	/// @param value [in, out] Copy the value into the buffer.  Ensure the buffer size is sufficient to hold the bytes being copied.
+	void value(uint8_t* value) const;
+
+	/// @brief Get the encoded value.
+	/// @return Returns a pointer to the value.
 	uint8_t* value();
+
+	/// @brief Set the value of a KLVElement instance.
+	/// @param newVal [in] The new value passed as byte array in @p newVal,
+	/// @param size [in] The size of the byte array passed in as @p newVal.
 	void setValue(uint8_t* newVal, int size);
 
+	/// @brief Parse the buffer to create a KLVElement
+	/// @param buf [in] The raw KLV encoded stream
+	/// @param size [in] The size of the KLV stream @p buf.
+	/// @return Return the number of bytes read.
 	int parse(uint8_t* buf, int size);
 
+	/// @brief 
+	/// @param buf 
+	/// @param size 
+	/// @return 
 	int parseSecuritySetElement(uint8_t* buf, int size);
 
+	/// @brief 
+	/// @param buf 
+	/// @param size 
+	/// @return 
 	int parseUniversalSetElement(uint8_t* buf, int size);
 
+	/// @brief Serialize the KLVElement to a byte array.
+	/// @param buf [in, out] The byte array passed in by the client code to hold the serialize KLV encoding.
+	/// @param bufsz [in] The size of the passed in byte array, @p buf
+	/// @return Returns the number of bytes that was serialized to the byte array passed in by @p buf. 
 	int serialize(uint8_t* buf, int bufsz);
 
 	void* appData();

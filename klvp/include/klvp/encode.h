@@ -13,7 +13,7 @@
 
 namespace lcss
 {
-
+/// @brief A Visitor class that visit a KLVElement and serialized it.
 class KLVEncodeVisitor
 	: public Loki::BaseVisitor,
 	public Loki::Visitor<lcss::KLVUnknown>,

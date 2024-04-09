@@ -1,3 +1,4 @@
+/// @file Implementation file for KLVParser
 #include "klvprsr.h"
 #include "util.h"
 
@@ -16,6 +17,7 @@ uint64_t htonll ( uint64_t Value );
 /////////////////////////////////////////////////////////////////////////////
 // KLVParser::Impl
 
+/// @brief Implementation class of KLVParser
 namespace lcss
 {
 	class KLVParser::Impl
@@ -134,6 +136,8 @@ static int getKLVSetSize(const uint8_t* stream, int sz)
 	return ret;
 }
 
+/// @brief Parse a MISB ST 0601 encoded stream in @p buffer.
+/// @param buffer [in] The buffer containing a MISB ST 0601 stream.
 void lcss::KLVParser::parse(const gsl::span<const uint8_t> buffer)
 {
 	for (const uint8_t& b : buffer)
@@ -234,6 +238,11 @@ void lcss::KLVParser::parse(const gsl::span<const uint8_t> buffer)
 	}
 }
 
+/// @brief The KLVParser instance calls this function when starting to parse a KLV Set.
+/// Override this function to extend its behavior for your context.  Ensure to call
+/// the parent function lcss::KLVParser::onBeginSet in your override function.
+/// @param len [in] The KLV Set size in bytes excluding the 16 byte Set tag and length bytes.
+/// @param type [in] The KLV Set type.  See @ref lcss::TYPE "lcss::TYPE" enumeration. 
 void lcss::KLVParser::onBeginSet(int len, TYPE type)
 {
 	_pimpl->setsize_ = len;
@@ -241,12 +250,19 @@ void lcss::KLVParser::onBeginSet(int len, TYPE type)
 	_pimpl->pbuffer_.clear();
 }
 
+/// @brief The KLVParser calls this function when completing parsing a KLV element.  
+/// Override this function to extent its behavior for your context.  Ensure to call the 
+/// parent function lcss::KLVParser::onElement in your override function.
+/// @param klv [in] The KLVElement instance that was parsed.
 void lcss::KLVParser::onElement(lcss::KLVElement& klv)
 {
 	if (klv.key() == 1)
 		_pimpl->checksumElement_ = klv;
 }
 
+/// @brief The KLVParser calls this function when finishing parsing a KLV set.
+/// Override this function to extent its behavior for your context.  Ensure to call the 
+/// parent function lcss::KLVParser::onEndSet in your override function.
 void lcss::KLVParser::onEndSet()
 {
 	_pimpl->state_ = lcss::KLVParser::Impl::STATE::START_SET_KEY;
@@ -274,6 +290,11 @@ void lcss::KLVParser::onEndSet()
 	_pimpl->sodb_.clear();
 }
 
+/// @brief The KLVParser call this function when parsing error occurs. 
+///  Override this function to extent its behavior for your context.  Ensure to call the 
+/// parent function lcss::KLVParser::onError in your override function.
+/// @param errmsg [in] The error message
+/// @param pos [in] The position in the byte stream where the error is located.
 void lcss::KLVParser::onError(const char* errmsg, int pos)
 {
 	_pimpl->state_ = lcss::KLVParser::Impl::STATE::START_SET_KEY;
@@ -282,11 +303,18 @@ void lcss::KLVParser::onError(const char* errmsg, int pos)
 	_pimpl->sodb_.clear();
 }
 
+/// @brief Call this function to determine if the KLVParser is validating the KLV set checksum.
+/// By default KLV set checksum validation is disable (false).
+/// @return Returns true if the KLVParser instance is validating the KLV set checksum, otherwise false.
 bool lcss::KLVParser::isValidating() const noexcept
 {
 	return _pimpl->validateChecksum_;
 }
 
+/// @brief Enable or disable checksum validation while parsing. 
+/// By default KLV set checksum validation is disable (false).
+/// If checksum validation fails, the KLVParser will call KLVParser::onError.
+/// @param val [in] Set to true to enable KLV set checksum validation, otherwise false to disable.
 void lcss::KLVParser::validateChecksum(bool val) noexcept
 {
 	_pimpl->validateChecksum_ = val;

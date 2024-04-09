@@ -6,42 +6,6 @@ project(ldsdb
   LANGUAGES C CXX
 )
 
-############################################################################
-# Doxygen configuration
-############################################################################
-# Locate Doxygen in the environment. This will set DOXYGEN_FOUND variable 
-# as a result. When Doxygen is found, DOXYGEN_VERSION variable will be 
-# also set to found Doxygen version.
-find_package(Doxygen REQUIRED)
-
-# Override the default doxygen output directory, which is CMAKE_CURRENT_BINARY_DIR. 
-set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs")
-# Enable HTML documentation generation
-set(DOXYGEN_GENERATE_HTML YES)
-# Enable MAN page generation
-set(DOXYGEN_GENERATE_MAN NO)
-# Enable markdown support
-set(DOXYGEN_MARKDOWN_SUPPORT YES)
-# Enable autolink support
-set(DOXYGEN_AUTOLINK_SUPPORT YES)
-# Enable dot graph support
-set(DOXYGEN_HAVE_DOT YES)
-# Include collaboration diagrams in class documentation
-set(DOXYGEN_COLLABORATION_GRAPH NO)
-# Include class diagrams in class documentation
-set(DOXYGEN_CLASS_GRAPH YES)
-# Generate UML-like graphs
-set(DOXYGEN_UML_LOOK YES)
-# Include type and parameter information in UML graphs
-set(DOXYGEN_DOT_UML_DETAILS YES)
-# Max per-line length for graph content
-set(DOXYGEN_DOT_WRAP_THRESHOLD 100)
-# Enables drawing call graphs for the functions
-set(DOXYGEN_CALL_GRAPH YES)
-# Suppress the output messages
-set(DOXYGEN_QUIET YES)
-############################################################################
-
 find_package(unofficial-sqlite3 CONFIG REQUIRED)
 
 # set the postfix "d" for the resulting .so or .dll files when building the
@@ -72,13 +36,6 @@ target_include_directories(ldsdb
 )
 
 target_link_libraries(ldsdb PRIVATE unofficial::sqlite3::sqlite3)
-
-doxygen_add_docs(
-  ldsdb_docs
-  ${CMAKE_CURRENT_LIST_DIR}
-  ALL
-  COMMENT "Generating documentation for ldsdb library"
-)
 
 include(GNUInstallDirs)
 
