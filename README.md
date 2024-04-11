@@ -1,4 +1,4 @@
-# klvp {#mainpage}
+# klvp 
 
 Key-Length-Value (KLV) parser library (klvp) provides classes to allow client applications to parse or encode
 a KLV encoded metadata stream based on the following STANAG 4609 standards:
@@ -13,7 +13,7 @@ The __klvp__ project consists of two static libraries and an example application
 The project builds two libraries:
 
 - __klvp__ - KLV parser and encoder library
-- @ref "ldsdb/README.md" - Local Dataset (LDS) database library 
+- __ldsdp__ - Local Dataset (LDS) database library 
 
 ### Example Application (klv2xml)
 The example application, __klv2xml__, consumes the project's libraries to read a KLV encoded metadata stream and output an XML representation.

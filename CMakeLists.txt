@@ -4,7 +4,7 @@
 cmake_minimum_required (VERSION 3.21)
 
 project (klvp
-  VERSION 1.0.0
+  VERSION 1.0.1
   DESCRIPTION "STANAG 4609 KLV Parser Library"
   LANGUAGES C CXX
 )
@@ -13,7 +13,7 @@ project (klvp
 add_subdirectory (klvp)
 add_subdirectory (ldsdb)
 
-# Create an app, klv2xml, that reads KLV encode stream and outputs XML representation.
+# Create an example app, klv2xml, that reads KLV encode stream and outputs XML representation.
 add_executable(klv2xml)
 
 target_sources(klv2xml
@@ -81,7 +81,7 @@ set(DOXYGEN_QUIET YES)
 
 doxygen_add_docs(
   klvp_docs
-  README.md klvp/ ldsdb/ src/
+  Index.md klvp/ ldsdb/ src/
   ALL
   COMMENT "Generating documentation for klvp library"
 )

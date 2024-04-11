@@ -1,6 +1,10 @@
 #ifndef ENCODE_H
 #define ENCODE_H
 
+/// @file encode.h
+///
+/// KLVEncoder class definition
+
 // klvlex generated on Thu Apr 02 10:25:01 2015
 
 #include "klvelmt.h"
@@ -13,7 +17,8 @@
 
 namespace lcss
 {
-/// @brief A Visitor class that visit a KLVElement and serialized it.
+/// @brief Use KLVEncodeVisitor to take the machine datatypes (i.e int, double, char*) and KLV encode 
+///.KLVElement instance's value field.  
 class KLVEncodeVisitor
 	: public Loki::BaseVisitor,
 	public Loki::Visitor<lcss::KLVUnknown>,

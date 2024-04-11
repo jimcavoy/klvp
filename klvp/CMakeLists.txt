@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.21)
 
 project(klvp
-  VERSION 1.0.0
+  VERSION 1.0.1
   DESCRIPTION "STANAG 4609 ST 0601 KLV parser library"
   LANGUAGES C CXX
 )
@@ -45,6 +45,7 @@ target_sources(klvp
     src/klvsselmtimpl.cpp
     src/klvsselmtparse.cpp
     src/klvuselmtimpl.cpp
+    src/RawSerializeVisitor.h
     src/util.cpp
     include/klvp/decode.h
     include/klvp/encode.h
@@ -52,10 +53,9 @@ target_sources(klvp
     include/klvp/klvelmt.h
     include/klvp/klvelmtimpl.h
     include/klvp/klvprsr.h
-    include/klvp/KlvSizeVisitor.h
     include/klvp/klvsselmtimpl.h
     include/klvp/klvuselmtimpl.h
-    include/klvp/RawSerializedVisitor.h
+    include/klvp/KlvSizeVisitor.h
     include/klvp/treenode.h
     include/klvp/util.h
 )
@@ -111,7 +111,7 @@ include(CMakePackageConfigHelpers)
 # version argument to select between several versions of the package via specifying VERSION argument
 # to find_package().
 # We're not explicitly specifying the VERSION parameter to allow `write_basic_package_version_file` to 
-# get it from project(...) version (which is 1.0.0)
+# get it from project(...) version (which is 1.1.0)
 write_basic_package_version_file(
   "klvp-config-version.cmake"
   VERSION ${klvp_VERSION}

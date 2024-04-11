@@ -1,5 +1,11 @@
 #pragma once
 
+/**
+* @file ldsdb.h
+* 
+* Header file for the LDS Database library
+*/
+
 #include <vector>
 #include <memory>
 

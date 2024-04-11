@@ -17,9 +17,10 @@ uint64_t htonll ( uint64_t Value );
 /////////////////////////////////////////////////////////////////////////////
 // KLVParser::Impl
 
-/// @brief Implementation class of KLVParser
+
 namespace lcss
 {
+	/// @brief Implementation class of KLVParser
 	class KLVParser::Impl
 	{
 	public:

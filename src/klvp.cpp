@@ -17,6 +17,8 @@ const int N = 188*49;
 
 int main(int argc, char* argv[])
 {
+	using namespace klv2xml;
+
 	if(argc != 3)
 	{
 		cerr << "usage: klvptest infile databaseUrl" << endl;

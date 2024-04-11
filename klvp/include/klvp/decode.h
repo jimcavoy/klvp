@@ -1,3 +1,7 @@
+/// @file decode.h
+///
+/// KLVDecodeVisitor class definition
+
 #pragma once
 
 #include "klvelmt.h"
@@ -7,6 +11,7 @@
 
 namespace lcss
 {
+	/// @brief Use KLVDecodeVisitor to decode a KLVElement instance's value field.
 	class KLVDecodeVisitor
 		: public Loki::BaseVisitor,
 		public Loki::Visitor<lcss::KLVUnknown>,

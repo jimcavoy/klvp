@@ -1,6 +1,10 @@
 #ifndef KLVELMT_H
 #define KLVELMT_H
 
+/// @file klvelmt.h
+///
+/// The KLVElement class definition file.
+
 #include <memory>
 
 #include <loki/Visitor.h>
@@ -14,7 +18,8 @@ namespace lcss
 /////////////////////////////////////////////////////////////////////////////
 // KLVElement
 
-/// @brief KLVElement is a handle class
+/// @brief KLVElement is a handle class that reference its implementation in
+/// a body class KLVElementImpl.
 class KLVElement
 {
 public:
@@ -112,6 +117,8 @@ public:
 private:
 	int compare(const KLVElement& element) const;
 private:
+
+	/// @brief smart pointer to the class implementation (body) class.
 	std::shared_ptr<KLVElementImpl> pimpl_;
 };
 

@@ -13,6 +13,7 @@
 int main()
 {
 	using namespace std;
+	using namespace lcss;
 
 	unsigned char buffer[LEN]{};
 	double dValue = 13898.5463;

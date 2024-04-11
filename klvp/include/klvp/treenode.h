@@ -1,120 +1,123 @@
 #pragma once
 
-template< class N >
-class TreeNode
+namespace lcss
 {
-public:
-	typedef TreeNode* TreeNodePtr;
-public:
-	TreeNode()
-		:parent_(nullptr)
-		, child_(nullptr)
-		, sibling_(nullptr)
-	{}
-
-	~TreeNode() {
-	}
-
-	N getData() { return data_; }
-
-	void setData(N data)
+	template< class N >
+	class TreeNode
 	{
-		data_ = data;
-	}
+	public:
+		typedef TreeNode* TreeNodePtr;
+	public:
+		TreeNode()
+			:parent_(nullptr)
+			, child_(nullptr)
+			, sibling_(nullptr)
+		{}
 
-	TreeNodePtr parent() { return parent_; }
-	TreeNodePtr child() { return child_; }
-	TreeNodePtr sibling() { return sibling_; }
+		~TreeNode() {
+		}
 
-	void setParent(TreeNodePtr p)
-	{
-		parent_ = p;
-	}
+		N getData() { return data_; }
 
-	void setSibling(TreeNodePtr s)
-	{
-		sibling_ = s;
-	}
+		void setData(N data)
+		{
+			data_ = data;
+		}
 
-	void setChild(TreeNodePtr c)
-	{
-		child_ = c;
-	}
+		TreeNodePtr parent() { return parent_; }
+		TreeNodePtr child() { return child_; }
+		TreeNodePtr sibling() { return sibling_; }
 
-	void addChild(TreeNodePtr c)
-	{
-		if (child_ == nullptr)
+		void setParent(TreeNodePtr p)
+		{
+			parent_ = p;
+		}
+
+		void setSibling(TreeNodePtr s)
+		{
+			sibling_ = s;
+		}
+
+		void setChild(TreeNodePtr c)
 		{
 			child_ = c;
-			c->setParent(this);
 		}
-		else
+
+		void addChild(TreeNodePtr c)
 		{
-			TreeNodePtr last = child_;
-			while (last->sibling() != nullptr)
-				last = last->sibling();
-			last->setSibling(c);
-			c->setParent(this);
+			if (child_ == nullptr)
+			{
+				child_ = c;
+				c->setParent(this);
+			}
+			else
+			{
+				TreeNodePtr last = child_;
+				while (last->sibling() != nullptr)
+					last = last->sibling();
+				last->setSibling(c);
+				c->setParent(this);
+			}
 		}
-	}
 
-	void removeChild(TreeNodePtr c)
-	{
-		if (c == nullptr)
-			return;
-
-		if (c == child_)
+		void removeChild(TreeNodePtr c)
 		{
-			child_ = c->sibling();
-			return;
+			if (c == nullptr)
+				return;
+
+			if (c == child_)
+			{
+				child_ = c->sibling();
+				return;
+			}
+
+			TreeNodePtr s = findPrevSibling(c);
+
+			if (s != nullptr)
+				s->setSibling(c->sibling());
 		}
 
-		TreeNodePtr s = findPrevSibling(c);
+	private:
 
-		if (s != nullptr)
-			s->setSibling(c->sibling());
-	}
-
-private:
-
-	TreeNodePtr findPrevSibling(TreeNodePtr s)
-	{
-		TreeNodePtr n = s->parent()->child(); // get the first sibling
-
-		while (n != nullptr)
+		TreeNodePtr findPrevSibling(TreeNodePtr s)
 		{
-			if (n->sibling() == s)
-				return n;
-			n = n->sibling(); // get the next sibling
+			TreeNodePtr n = s->parent()->child(); // get the first sibling
+
+			while (n != nullptr)
+			{
+				if (n->sibling() == s)
+					return n;
+				n = n->sibling(); // get the next sibling
+			}
+			return n;
 		}
-		return n;
+
+	private:
+		N data_;
+		TreeNodePtr parent_;
+		TreeNodePtr child_;
+		TreeNodePtr sibling_;
+	};
+
+	template< class T, class P >
+	void preorderTreeWalk(T node, P p)
+	{
+		if (node != nullptr)
+		{
+			p(node);
+			preorderTreeWalk(node->child(), p);
+			preorderTreeWalk(node->sibling(), p);
+		}
 	}
 
-private:
-	N data_;
-	TreeNodePtr parent_;
-	TreeNodePtr child_;
-	TreeNodePtr sibling_;
-};
-
-template< class T, class P >
-void preorderTreeWalk(T node, P p)
-{
-	if (node != nullptr)
+	template< class T, class P >
+	void postorderTreeWalk(T node, P p)
 	{
-		p(node);
-		preorderTreeWalk(node->child(), p);
-		preorderTreeWalk(node->sibling(), p);
-	}
-}
-
-template< class T, class P >
-void postorderTreeWalk(T node, P p)
-{
-	if (node != nullptr)
-	{
-		postorderTreeWalk(node->child(), p);
-		postorderTreeWalk(node->sibling(), p);
-		p(node);
+		if (node != nullptr)
+		{
+			postorderTreeWalk(node->child(), p);
+			postorderTreeWalk(node->sibling(), p);
+			p(node);
+		}
 	}
 }
