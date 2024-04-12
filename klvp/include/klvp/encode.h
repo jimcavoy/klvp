@@ -18,7 +18,7 @@
 namespace lcss
 {
 /// @brief Use KLVEncodeVisitor to take the machine datatypes (i.e int, double, char*) and KLV encode 
-///.KLVElement instance's value field.  
+/// KLVElement instance's value field.  
 class KLVEncodeVisitor
 	: public Loki::BaseVisitor,
 	public Loki::Visitor<lcss::KLVUnknown>,

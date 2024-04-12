@@ -12,8 +12,8 @@ The __klvp__ project consists of two static libraries and an example application
 ### Static Libraries
 The project builds two libraries:
 
-- @ref "./klvp/README.md" - KLV parser and encoder library
-- @ref "./ldsdb/README.md" - Local Dataset (LDS) database library 
+- @ref ./klvp/README.md - KLV parser and encoder library
+- @ref ./ldsdb/README.md - Local Dataset (LDS) database library 
 
 ### Example Application (klv2xml)
 The example application, __klv2xml__, consumes the project's libraries to read a KLV encoded metadata stream and output an XML representation.
