@@ -43,6 +43,9 @@ install (FILES ${PROJECT_SOURCE_DIR}/data/klv.s3db
   TYPE DATA
 )
 
+option(ENABLE_DOCUMENTATION "Enable documentation" OFF)
+
+if (ENABLE_DOCUMENTATION)
 ############################################################################
 # Doxygen configuration
 ############################################################################
@@ -85,6 +88,7 @@ doxygen_add_docs(
   ALL
   COMMENT "Generating documentation for klvp library"
 )
+endif()
 
 # Test cases
 enable_testing()
