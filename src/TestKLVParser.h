@@ -3,23 +3,28 @@
 
 #include "KLVPrintVisitor.h"
 
-class TestKLVParser :
-	public lcss::KLVParser
+namespace klv2xml
 {
-public:
-	TestKLVParser(KLVPrintVisitor& printer);
-	virtual ~TestKLVParser(void);
+	/// @brief 
+	class TestKLVParser :
+		public lcss::KLVParser
+	{
+	public:
+		TestKLVParser(KLVPrintVisitor& printer);
+		virtual ~TestKLVParser(void);
 
-	virtual void onBeginSet(int len, lcss::TYPE type);
-	virtual void onElement( lcss::KLVElement& klv);
-	virtual void onEndSet();
-	virtual void onError(const char* errmsg, int pos);
+		void onBeginSet(int len, lcss::TYPE type) override;
+		void onElement(lcss::KLVElement& klv) override;
+		void onEndSet() override;
+		void onError(const char* errmsg, int pos) override;
 
-	int count() const { return count_; }
+		int count() const { return count_; }
 
-private:
-	int						count_;
-	lcss::TYPE	type_;
-	KLVPrintVisitor&		printVisitor_;
-};
+	private:
+		int					count_;
+		lcss::TYPE			type_;
+		KLVPrintVisitor&	printVisitor_;
+	};
 
+
+}

@@ -8,21 +8,24 @@
 
 namespace lcss
 {
+	/// @brief KLV Set types
 	enum class TYPE : int {
-		LOCAL_SET,
-		UNIVERSAL_SET,
-		SECURITY_UNIVERSAL_SET,
-		UNIVERSAL_ELEMENT,
-		UNKNOWN
+		LOCAL_SET, ///< Local set
+		UNIVERSAL_SET, ///< Universal set
+		SECURITY_UNIVERSAL_SET,  ///< Universal security set
+		UNIVERSAL_ELEMENT, ///< Universal element
+		UNKNOWN ///< Unknown set type
 	};
 
 /////////////////////////////////////////////////////////////////////////////
 // KLVParser
+
+	/// @brief Inherit KLVParser to parse a MISB ST 0601 encoded stream.
 	class KLVParser
 	{	
 	public:
-		KLVParser();
-		virtual ~KLVParser();
+		KLVParser(); ///< Default constructor
+		virtual ~KLVParser(); ///< class destructor
 
 		virtual void parse(const gsl::span<const uint8_t> buffer);
 
@@ -36,12 +39,15 @@ namespace lcss
 		void validateChecksum(bool val) noexcept;
 
 	protected:
-		class Impl;
-		std::unique_ptr<Impl> _pimpl;
+		class Impl; ///< KLVParser implementation class
+		std::unique_ptr<Impl> _pimpl; ///< smart pointer the KLVParser implementation class
 	};
 
 /////////////////////////////////////////////////////////////////////////////
 // KLVSecuritySetParser
+
+	/// @brief Inherit KLVSecuritySetParser to parse a MISB ST 0102 encoded 
+	/// stream.
 	class KLVSecuritySetParser
 		:public KLVParser
 	{

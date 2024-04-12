@@ -101,877 +101,880 @@ namespace
 		return bytesUsed;
 	}
 }
-
-KLVPrintVisitor::KLVPrintVisitor(const char* dbUri)
+namespace klv2xml
 {
-	cout.precision(6);
-	cout << fixed;
-}
 
-void KLVPrintVisitor::Visit(lcss::KLVUnknown& klv)
-{
-	uint16_t key = (uint16_t)klv.key();
-	uint8_t* val = new uint8_t[klv.length()];
-	memset(val, 0, klv.length());
-	klv.value(val);
-
-	cout << "\t\t<KLVUnknown key=\"" << key << "\" length=\"" << klv.length() << "\">";
-	for (int i = 0; i < klv.length(); i++)
+	KLVPrintVisitor::KLVPrintVisitor(const char* dbUri)
 	{
-		cout << "0x" << setw(2) << setfill('0') << hex << (int)val[i] << " ";
+		cout.precision(6);
+		cout << fixed;
 	}
-	cout << dec << "</KLVUnknown>" << endl;
-	delete[] val;
-}
 
-void KLVPrintVisitor::Visit(lcss::KLVParseError& klv)
-{
-	uint16_t key = (uint16_t)klv.key();
-	uint8_t* val = new uint8_t[klv.length()];
-	memset(val, 0, klv.length());
-	klv.value(val);
-
-	cout << "\t\t<KLVParseError key=\"" << key << "\" length=\"" << klv.length() << "\" what=\"" << klv.what_.c_str() << "\">";
-	for (int i = 0; i < klv.length(); i++)
+	void KLVPrintVisitor::Visit(lcss::KLVUnknown& klv)
 	{
-		cout << "0x" << setw(2) << setfill('0') << hex << (int)val[i] << " ";
+		uint16_t key = (uint16_t)klv.key();
+		uint8_t* val = new uint8_t[klv.length()];
+		memset(val, 0, klv.length());
+		klv.value(val);
+
+		cout << "\t\t<KLVUnknown key=\"" << key << "\" length=\"" << klv.length() << "\">";
+		for (int i = 0; i < klv.length(); i++)
+		{
+			cout << "0x" << setw(2) << setfill('0') << hex << (int)val[i] << " ";
+		}
+		cout << dec << "</KLVUnknown>" << endl;
+		delete[] val;
 	}
-	cout << dec << "</KLVParseError>" << endl;
-	delete[] val;
-}
 
-void KLVPrintVisitor::Visit(lcss::KLVChecksum& klv)
-{
-	uint8_t val[2];
-	memset(val, 0, 2);
-	klv.value(val);
-	char crc[16];
-	sprintf_s(crc, "%#4.2x %#4.2x", val[0], val[1]);
+	void KLVPrintVisitor::Visit(lcss::KLVParseError& klv)
+	{
+		uint16_t key = (uint16_t)klv.key();
+		uint8_t* val = new uint8_t[klv.length()];
+		memset(val, 0, klv.length());
+		klv.value(val);
 
-	std::string classname = className(klv);
-	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << crc << "</" << classname << ">" << endl;
-}
+		cout << "\t\t<KLVParseError key=\"" << key << "\" length=\"" << klv.length() << "\" what=\"" << klv.what_.c_str() << "\">";
+		for (int i = 0; i < klv.length(); i++)
+		{
+			cout << "0x" << setw(2) << setfill('0') << hex << (int)val[i] << " ";
+		}
+		cout << dec << "</KLVParseError>" << endl;
+		delete[] val;
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVUNIXTimeStamp& klv)
-{
+	void KLVPrintVisitor::Visit(lcss::KLVChecksum& klv)
+	{
+		uint8_t val[2];
+		memset(val, 0, 2);
+		klv.value(val);
+		char crc[16];
+		sprintf_s(crc, "%#4.2x %#4.2x", val[0], val[1]);
+
+		std::string classname = className(klv);
+		cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << crc << "</" << classname << ">" << endl;
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVUNIXTimeStamp& klv)
+	{
 #ifdef WIN32
-	struct tm st;
+		struct tm st;
 #else
-	struct tm* st;
+		struct tm* st;
 #endif
-	uint8_t value[8]{};
-	klv.value(value);
-	char timebuf[BUFSIZ]{};
-	klv.Accept(_decoder);
-	char szTime[BUFSIZ]{};
-
-	int usec = _decoder.tmValue % 1000000; // microseconds
-	time_t time = (time_t)_decoder.tmValue / 1e6; // seconds
-	
-#ifdef WIN32
-	gmtime_s(&st, &time);
-	strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", &st);
-	_snprintf_s(timebuf, BUFSIZ, "%s.%06ld UTC", szTime, usec);
-#else
-	st = gmtime(&time);
-	strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", st);
-	sprintf(timebuf,"%s.%06d UTC", szTime, usec);
-#endif
-	std::string classname = className(klv);
-	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << timebuf << "</" << classname << ">" << endl;
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVMissionID& klv)
-{
-	printStringElement(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformTailNumber& klv)
-{
-	printStringElement(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformHeadingAngle& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformPitchAngle& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformRollAngle& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformTrueAirspeed& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformIndicatedAirspeed& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformDesignation& klv)
-{
-	printStringElement(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVImageSourceSensor& klv)
-{
-	printStringElement(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVImageCoordinateSystem& klv)
-{
-	printStringElement(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVSensorLatitude& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVSensorLongitude& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVSensorTrueAltitude& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVSensorHorizontalFieldofView& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVSensorVerticalFieldofView& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVSensorRelativeAzimuthAngle& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVSensorRelativeElevationAngle& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVSensorRelativeRollAngle& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVSlantRange& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVTargetWidth& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVFrameCenterLatitude& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVFrameCenterLongitude& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVFrameCenterElevation& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLatitudePoint1& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLongitudePoint1& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLatitudePoint2& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLongitudePoint2& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLatitudePoint3& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLongitudePoint3& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLatitudePoint4& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLongitudePoint4& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVIcingDetected& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVWindDirection& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVWindSpeed& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVStaticPressure& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVDensityAltitude& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVOutsideAirTemperature& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVTargetLocationLatitude& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVTargetLocationLongitude& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVTargetLocationElevation& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVTargetTrackGateWidth& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVTargetTrackGateHeight& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVTargetErrorEstimateCE90& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVTargetErrorEstimateLE90& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVGenericFlagData01& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVSecurityLocalMetadataSet& klv)
-{
-	uint8_t ss[BUFSIZ]{};
-	uint8_t value[BUFSIZ]{};
-	klv.value(value);
-	ss[0] = 0x30;
-
-	const int bytesEncoded = encodeBERLength(ss + 1, klv.length());
-	memcpy(ss + 1 + bytesEncoded, value, klv.length());
-
-	TestKLVSecuritySetParser ssp;
-	ssp.parse({ ss, gsl::narrow_cast<std::size_t>(klv.length() + bytesEncoded + 1) });
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVDifferentialPressure& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformAngleofAttack& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformVerticalSpeed& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformSideslipAngle& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVAirfieldBarometicPressure& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVAirfieldElevation& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVRelativeHumidity& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformGroundSpeed& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVGroundRange& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformFuelRemaining& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformCallSign& klv)
-{
-	printStringElement(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVWeaponLoad& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVWeaponFired& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVLaserPRFCode& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVSensorFieldofViewName& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPlatformMagneticHeading& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVUASLDSVersionNumber& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVTargetLocationCovarianceMatrix& klv)
-{
-	printNotImplemented(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformLatitude& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformLongitude& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformAltitude& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformName& klv)
-{
-	printStringElement(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformHeading& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVEventStartTimeUTC& klv)
-{
-#ifdef WIN32
-	struct tm st;
-#else
-	struct tm* st;
-#endif
-	uint8_t value[8]{};
-	klv.value(value);
-	char timebuf[BUFSIZ]{};
-	klv.Accept(_decoder);
-	char szTime[BUFSIZ]{};
-
-	int usec = _decoder.tmValue % 1000000; // microseconds
-	time_t time = (time_t)_decoder.tmValue / 1e6; // seconds
+		uint8_t value[8]{};
+		klv.value(value);
+		char timebuf[BUFSIZ]{};
+		klv.Accept(_decoder);
+		char szTime[BUFSIZ]{};
+
+		int usec = _decoder.tmValue % 1000000; // microseconds
+		time_t time = (time_t)_decoder.tmValue / 1e6; // seconds
 
 #ifdef WIN32
-	gmtime_s(&st, &time);
-	strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", &st);
-	_snprintf_s(timebuf, BUFSIZ, "%s.%06ld UTC", szTime, usec);
+		gmtime_s(&st, &time);
+		strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", &st);
+		_snprintf_s(timebuf, BUFSIZ, "%s.%06ld UTC", szTime, usec);
 #else
-	st = gmtime(&time);
-	strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", st);
-	sprintf(timebuf,"%s.%06d UTC", szTime, usec);
+		st = gmtime(&time);
+		strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", st);
+		sprintf(timebuf, "%s.%06d UTC", szTime, usec);
 #endif
-	std::string classname = className(klv);
-	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << timebuf << "</" << classname << ">" << endl;
-}
+		std::string classname = className(klv);
+		cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << timebuf << "</" << classname << ">" << endl;
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVRVTLocalDataSet& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVMissionID& klv)
+	{
+		printStringElement(klv);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVVMTILocalDataSet& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformTailNumber& klv)
+	{
+		printStringElement(klv);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVSensorEllipsoidHeight& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformHeadingAngle& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformEllipsoidHeight& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformPitchAngle& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVOperationalMode& klv)
-{
-	printIntElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformRollAngle& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVFrameCenterHeightAboveEllipsoid& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformTrueAirspeed& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVSensorNorthVelocity& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformIndicatedAirspeed& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVSensorEastVelocity& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformDesignation& klv)
+	{
+		printStringElement(klv);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVImageHorizonPixelPack& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVImageSourceSensor& klv)
+	{
+		printStringElement(klv);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVCornerLatitudePoint1Full& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVImageCoordinateSystem& klv)
+	{
+		printStringElement(klv);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVCornerLongitudePoint1Full& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVSensorLatitude& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVCornerLatitudePoint2Full& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVSensorLongitude& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVCornerLongitudePoint2Full& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVSensorTrueAltitude& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVCornerLatitudePoint3Full& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVSensorHorizontalFieldofView& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVCornerLongitudePoint3Full& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVSensorVerticalFieldofView& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVCornerLatitudePoint4Full& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVSensorRelativeAzimuthAngle& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVCornerLongitudePoint4Full& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVSensorRelativeElevationAngle& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVPlatformPitchAngleFull& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVSensorRelativeRollAngle& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVPlatformRollAngleFull& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVSlantRange& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVPlatformAngleofAttackFull& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVTargetWidth& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVPlatformSideslipAngleFull& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVFrameCenterLatitude& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVMIISCoreIdentifier& klv)
-{
-	uint8_t value[18];
-	klv.value(value);
-	char uuid[BUFSIZ];
+	void KLVPrintVisitor::Visit(lcss::KLVFrameCenterLongitude& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-	sprintf_s(uuid, "%02X%02X:%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
-		value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7],
-		value[8], value[9], value[10], value[11], value[12], value[13], value[14],
-		value[15], value[16], value[17]);
+	void KLVPrintVisitor::Visit(lcss::KLVFrameCenterElevation& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-	std::string classname = className(klv);
-	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << uuid << "</" << classname << ">" << endl;
-}
+	void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLatitudePoint1& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVSARMotionImageryMetadata& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLongitudePoint1& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVTargetWidthExtended& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLatitudePoint2& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVRangeImageLocalSet& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLongitudePoint2& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVGeoRegistrationLocalSet& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLatitudePoint3& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVCompositeImagingLocalSet& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLongitudePoint3& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVSegmentLocalSet& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLatitudePoint4& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVAmendLocalSet& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVOffsetCornerLongitudePoint4& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVSDCCFLP& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVIcingDetected& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVDensityAltitudeExtended& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVWindDirection& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVSensorEllipsoidHeightExtended& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVWindSpeed& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformEllipsoidHeightExtended& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVStaticPressure& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVStreamDesignator& klv)
-{
-	printStringElement(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVDensityAltitude& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVOperationalBase& klv)
-{
-	printStringElement(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVOutsideAirTemperature& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVBroadcastSource& klv)
-{
-	printStringElement(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVTargetLocationLatitude& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVRangeToRecoveryLocation& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVTargetLocationLongitude& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVTimeAirborne& klv)
-{
-	printIntElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVTargetLocationElevation& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVPropulsionUnitSpeed& klv)
-{
-	printIntElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVTargetTrackGateWidth& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVPlatformCourseAngle& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVTargetTrackGateHeight& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVAltitudeAGL& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVTargetErrorEstimateCE90& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVRadarAltimeter& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVTargetErrorEstimateLE90& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVControlCommand& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVGenericFlagData01& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVControlCommandVerificationList& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVSecurityLocalMetadataSet& klv)
+	{
+		uint8_t ss[BUFSIZ]{};
+		uint8_t value[BUFSIZ]{};
+		klv.value(value);
+		ss[0] = 0x30;
 
-void KLVPrintVisitor::Visit(lcss::KLVSensorAzimuthRate& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+		const int bytesEncoded = encodeBERLength(ss + 1, klv.length());
+		memcpy(ss + 1 + bytesEncoded, value, klv.length());
 
-void KLVPrintVisitor::Visit(lcss::KLVSensorElevationRate& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+		TestKLVSecuritySetParser ssp;
+		ssp.parse({ ss, gsl::narrow_cast<std::size_t>(klv.length() + bytesEncoded + 1) });
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVSensorRollRate& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVDifferentialPressure& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVOnboardMIStoragePercentFull& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformAngleofAttack& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVActiveWavelengthList& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformVerticalSpeed& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVCountryCodes& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformSideslipAngle& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVNumberofNAVSATsinView& klv)
-{
-	printIntElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVAirfieldBarometicPressure& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVPositioningMethodSource& klv)
-{
-	printIntElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVAirfieldElevation& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVPlatformStatus& klv)
-{
-	printIntElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVRelativeHumidity& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVSensorControlMode& klv)
-{
-	printIntElement(klv, _decoder);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformGroundSpeed& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVSensorFrameRatePack& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVGroundRange& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVWavelengthsList& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformFuelRemaining& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVTargetID& klv)
-{
-	printStringElement(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformCallSign& klv)
+	{
+		printStringElement(klv);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVAirbaseLocations& klv)
-{
-	printNotImplemented(klv);
-}
+	void KLVPrintVisitor::Visit(lcss::KLVWeaponLoad& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
 
-void KLVPrintVisitor::Visit(lcss::KLVTakeoffTime& klv)
-{
+	void KLVPrintVisitor::Visit(lcss::KLVWeaponFired& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVLaserPRFCode& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSensorFieldofViewName& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformMagneticHeading& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVUASLDSVersionNumber& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVTargetLocationCovarianceMatrix& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformLatitude& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformLongitude& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformAltitude& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformName& klv)
+	{
+		printStringElement(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformHeading& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVEventStartTimeUTC& klv)
+	{
 #ifdef WIN32
-	std::string strValue;
-	uint8_t value[8]{};
-	klv.value(value);
-	char timebuf[26]{};
-	int64_t lVal;
-	memcpy(&lVal, value, 8);
-	__time64_t time = ntohll(lVal);
-	int n = time % 1000000;
-	n = n / 1000; // milliseconds
-	time = time / 1000000;
-
-	errno_t err = _ctime64_s(timebuf, sizeof(timebuf), &time);
-	if (err)
-	{
-		strValue = string("\"Error\"");
-	}
-	else
-	{
-		timebuf[24] = 0; //remove the carriage return
-		strValue = string(timebuf);
-		strValue += " (";
-		char num[64];
-		_itoa_s(n, num, 10);
-		strValue += num;
-		strValue += " ms)";
-	}
-	std::string classname = className(klv);
-	cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << strValue.c_str() << "</" << classname << ">" << endl;
+		struct tm st;
 #else
-	printNotImplemented(klv);
+		struct tm* st;
 #endif
-}
+		uint8_t value[8]{};
+		klv.value(value);
+		char timebuf[BUFSIZ]{};
+		klv.Accept(_decoder);
+		char szTime[BUFSIZ]{};
 
-void KLVPrintVisitor::Visit(lcss::KLVTransmissionFrequency& klv)
-{
-	printFloatElement(klv, _decoder);
-}
+		int usec = _decoder.tmValue % 1000000; // microseconds
+		time_t time = (time_t)_decoder.tmValue / 1e6; // seconds
 
-void KLVPrintVisitor::Visit(lcss::KLVOnboardMIStorageCapacity& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVZoomPercentage& klv)
-{
-	printFloatElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVCommunicationsMethod& klv)
-{
-	printStringElement(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVLeapSeconds& klv)
-{
-	printIntElement(klv, _decoder);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVCorrectionOffset& klv)
-{
-	printNotImplemented(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVPayloadList& klv)
-{
-	printNotImplemented(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVActivePayloads& klv)
-{
-	printNotImplemented(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVWeaponsStores& klv)
-{
-	printNotImplemented(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::KLVWaypointList& klv)
-{
-	printNotImplemented(klv);
-}
-
-void KLVPrintVisitor::Visit(lcss::UniversalMetadataElement& klv)
-{
-	uint8_t key[16];
-	klv.key(key);
-	uint8_t* val = new uint8_t[klv.length()];
-	memset(val, 0, klv.length());
-	klv.value(val);
-
-	cout << "\t\t<UniversalSetElement key=\"";
-	for (int i = 0; i < 16; i++)
-	{
-		cout << "0x" << setw(2) << setfill('0') << hex << (int)key[i];
-		if (i < 15)
-			cout << " ";
+#ifdef WIN32
+		gmtime_s(&st, &time);
+		strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", &st);
+		_snprintf_s(timebuf, BUFSIZ, "%s.%06ld UTC", szTime, usec);
+#else
+		st = gmtime(&time);
+		strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", st);
+		sprintf(timebuf, "%s.%06d UTC", szTime, usec);
+#endif
+		std::string classname = className(klv);
+		cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << timebuf << "</" << classname << ">" << endl;
 	}
-	cout << "\">";
-	for (int i = 0; i < klv.length(); i++)
+
+	void KLVPrintVisitor::Visit(lcss::KLVRVTLocalDataSet& klv)
 	{
-		cout << "0x" << setw(2) << setfill('0') << hex << (int)val[i];
-		if (i < klv.length() - 1)
-			cout << " ";
+		printNotImplemented(klv);
 	}
-	cout << dec << "</UniversalSetElement>" << endl;
-	delete[] val;
+
+	void KLVPrintVisitor::Visit(lcss::KLVVMTILocalDataSet& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSensorEllipsoidHeight& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformEllipsoidHeight& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVOperationalMode& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVFrameCenterHeightAboveEllipsoid& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSensorNorthVelocity& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSensorEastVelocity& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVImageHorizonPixelPack& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVCornerLatitudePoint1Full& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVCornerLongitudePoint1Full& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVCornerLatitudePoint2Full& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVCornerLongitudePoint2Full& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVCornerLatitudePoint3Full& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVCornerLongitudePoint3Full& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVCornerLatitudePoint4Full& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVCornerLongitudePoint4Full& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformPitchAngleFull& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformRollAngleFull& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformAngleofAttackFull& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformSideslipAngleFull& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVMIISCoreIdentifier& klv)
+	{
+		uint8_t value[18];
+		klv.value(value);
+		char uuid[BUFSIZ];
+
+		sprintf_s(uuid, "%02X%02X:%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+			value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7],
+			value[8], value[9], value[10], value[11], value[12], value[13], value[14],
+			value[15], value[16], value[17]);
+
+		std::string classname = className(klv);
+		cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << uuid << "</" << classname << ">" << endl;
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSARMotionImageryMetadata& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVTargetWidthExtended& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVRangeImageLocalSet& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVGeoRegistrationLocalSet& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVCompositeImagingLocalSet& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSegmentLocalSet& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVAmendLocalSet& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSDCCFLP& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVDensityAltitudeExtended& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSensorEllipsoidHeightExtended& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVAlternatePlatformEllipsoidHeightExtended& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVStreamDesignator& klv)
+	{
+		printStringElement(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVOperationalBase& klv)
+	{
+		printStringElement(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVBroadcastSource& klv)
+	{
+		printStringElement(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVRangeToRecoveryLocation& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVTimeAirborne& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVPropulsionUnitSpeed& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformCourseAngle& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVAltitudeAGL& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVRadarAltimeter& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVControlCommand& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVControlCommandVerificationList& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSensorAzimuthRate& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSensorElevationRate& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSensorRollRate& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVOnboardMIStoragePercentFull& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVActiveWavelengthList& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVCountryCodes& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVNumberofNAVSATsinView& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVPositioningMethodSource& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVPlatformStatus& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSensorControlMode& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVSensorFrameRatePack& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVWavelengthsList& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVTargetID& klv)
+	{
+		printStringElement(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVAirbaseLocations& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVTakeoffTime& klv)
+	{
+#ifdef WIN32
+		std::string strValue;
+		uint8_t value[8]{};
+		klv.value(value);
+		char timebuf[26]{};
+		int64_t lVal;
+		memcpy(&lVal, value, 8);
+		__time64_t time = ntohll(lVal);
+		int n = time % 1000000;
+		n = n / 1000; // milliseconds
+		time = time / 1000000;
+
+		errno_t err = _ctime64_s(timebuf, sizeof(timebuf), &time);
+		if (err)
+		{
+			strValue = string("\"Error\"");
+		}
+		else
+		{
+			timebuf[24] = 0; //remove the carriage return
+			strValue = string(timebuf);
+			strValue += " (";
+			char num[64];
+			_itoa_s(n, num, 10);
+			strValue += num;
+			strValue += " ms)";
+		}
+		std::string classname = className(klv);
+		cout << "\t\t<" << classname << " key=\"" << (int)klv.key() << "\">" << strValue.c_str() << "</" << classname << ">" << endl;
+#else
+		printNotImplemented(klv);
+#endif
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVTransmissionFrequency& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVOnboardMIStorageCapacity& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVZoomPercentage& klv)
+	{
+		printFloatElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVCommunicationsMethod& klv)
+	{
+		printStringElement(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVLeapSeconds& klv)
+	{
+		printIntElement(klv, _decoder);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVCorrectionOffset& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVPayloadList& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVActivePayloads& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVWeaponsStores& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::KLVWaypointList& klv)
+	{
+		printNotImplemented(klv);
+	}
+
+	void KLVPrintVisitor::Visit(lcss::UniversalMetadataElement& klv)
+	{
+		uint8_t key[16];
+		klv.key(key);
+		uint8_t* val = new uint8_t[klv.length()];
+		memset(val, 0, klv.length());
+		klv.value(val);
+
+		cout << "\t\t<UniversalSetElement key=\"";
+		for (int i = 0; i < 16; i++)
+		{
+			cout << "0x" << setw(2) << setfill('0') << hex << (int)key[i];
+			if (i < 15)
+				cout << " ";
+		}
+		cout << "\">";
+		for (int i = 0; i < klv.length(); i++)
+		{
+			cout << "0x" << setw(2) << setfill('0') << hex << (int)val[i];
+			if (i < klv.length() - 1)
+				cout << " ";
+		}
+		cout << dec << "</UniversalSetElement>" << endl;
+		delete[] val;
+	}
 }

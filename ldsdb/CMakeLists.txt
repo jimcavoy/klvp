@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.21)
 
 project(ldsdb
   VERSION 1.0.0
-  DESCRIPTION "STANAG 4609 ST 0601 LDS Database library"
+  DESCRIPTION "STANAG 4609 LDS Database library"
   LANGUAGES C CXX
 )
 

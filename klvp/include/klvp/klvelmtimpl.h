@@ -2,6 +2,12 @@
 #define KLVELMTIMPL_H 
 // klvlex generated on Tue Jan 12 07:41:50 2021
 
+
+/// @file klvelmtimpl.h
+///
+/// Contains KLVElementImpl class definition and all its derived classes that 
+/// implement KLV element types specified in MISB ST 0601.
+
 #include <loki/Visitor.h>
 #include <vector>
 #include <string>
@@ -16,6 +22,9 @@ namespace lcss
 {
 	/////////////////////////////////////////////////////////////////////////////
 	// KLVElementImpl
+
+	/// @brief Definition for the base implementation class KLVElementImpl that 
+	/// all derived classes share
 	class KLVElementImpl
 		:public Loki::BaseVisitable<>
 	{
