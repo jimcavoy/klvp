@@ -1,6 +1,5 @@
 #include "klvelmtimpl.h"
 
-#include <iterator>
 #include <cstring>
 #ifdef WIN32
 #include <WinSock2.h>
@@ -37,11 +36,7 @@ int lcss::KLVElementImpl::key(uint8_t* keybuf) const
     }
     else if (key_.size() == 16)
     {
-#ifdef WIN32
-        std::copy(key_.begin(), key_.end(), stdext::checked_array_iterator<uint8_t*>(keybuf, 16));
-#else
         std::copy(key_.begin(), key_.end(), keybuf);
-#endif
         return 16;
     }
     else if (key_[0] < 128)
@@ -80,11 +75,7 @@ int lcss::KLVElementImpl::numOfBytesForLength() const
 }
 void lcss::KLVElementImpl::value(uint8_t* buf) const
 {
-#ifdef WIN32
-    std::copy(value_.begin(), value_.end(), stdext::checked_array_iterator<uint8_t*>(buf, length()));
-#else
     std::copy(value_.begin(), value_.end(), buf);
-#endif
 }
 uint8_t* lcss::KLVElementImpl::value() { return value_.data(); }
 void lcss::KLVElementImpl::setValue(uint8_t* buf, int bufsz)
