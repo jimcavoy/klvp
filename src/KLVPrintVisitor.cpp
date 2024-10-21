@@ -164,20 +164,20 @@ namespace klv2xml
 #endif
         uint8_t value[8]{};
         klv.value(value);
-        char timebuf[BUFSIZ]{};
+        char timebuf[512]{};
         klv.Accept(_decoder);
-        char szTime[BUFSIZ]{};
+        char szTime[256]{};
 
         int usec = _decoder.tmValue % 1000000; // microseconds
         time_t time = (time_t)_decoder.tmValue / 1e6; // seconds
 
 #ifdef WIN32
         gmtime_s(&st, &time);
-        strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", &st);
-        _snprintf_s(timebuf, BUFSIZ, "%s.%06ld UTC", szTime, usec);
+        strftime(szTime, 256, "%A, %d-%b-%y %T", &st);
+        _snprintf_s(timebuf, 512, "%s.%06ld UTC", szTime, usec);
 #else
         st = gmtime(&time);
-        strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", st);
+        strftime(szTime, 256, "%A, %d-%b-%y %T", st);
         sprintf(timebuf, "%s.%06d UTC", szTime, usec);
 #endif
         std::string classname = className(klv);
@@ -547,20 +547,20 @@ namespace klv2xml
 #endif
         uint8_t value[8]{};
         klv.value(value);
-        char timebuf[BUFSIZ]{};
+        char timebuf[512]{};
         klv.Accept(_decoder);
-        char szTime[BUFSIZ]{};
+        char szTime[256]{};
 
         int usec = _decoder.tmValue % 1000000; // microseconds
         time_t time = (time_t)_decoder.tmValue / 1e6; // seconds
 
 #ifdef WIN32
         gmtime_s(&st, &time);
-        strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", &st);
-        _snprintf_s(timebuf, BUFSIZ, "%s.%06ld UTC", szTime, usec);
+        strftime(szTime, 256, "%A, %d-%b-%y %T", &st);
+        _snprintf_s(timebuf, 512, "%s.%06ld UTC", szTime, usec);
 #else
         st = gmtime(&time);
-        strftime(szTime, BUFSIZ, "%A, %d-%b-%y %T", st);
+        strftime(szTime, 256, "%A, %d-%b-%y %T", st);
         sprintf(timebuf, "%s.%06d UTC", szTime, usec);
 #endif
         std::string classname = className(klv);
