@@ -59,7 +59,7 @@ target_sources(klvp
 set_property(TARGET klvp PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # specify the C++ standard
-target_compile_features( klvp PUBLIC cxx_std_20)
+target_compile_features( klvp PUBLIC cxx_std_14)
 
 target_link_libraries(klvp PUBLIC Microsoft.GSL::GSL)
 
