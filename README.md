@@ -26,6 +26,7 @@ This project requires the following:
 1. Install CMake, https://cmake.org/
 2. Install vcpkg, https://github.com/microsoft/vcpkg, which is a packet management system.
 3. Configure `VCPKG_ROOT` environment variable to the path where you installed __vcpkg__.
+4. Add `VCPKG_ROOT` to the `PATH` environment variable.
 
 ### To Build and Install
 In __klvp__ root directory, build and install this project using CMake with the following commands on a terminal:
