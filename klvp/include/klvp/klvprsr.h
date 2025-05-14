@@ -5,7 +5,6 @@
 
 #include <gsl/gsl>
 #include <memory>
-#include <span>
 
 namespace lcss
 {
