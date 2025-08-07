@@ -13,6 +13,8 @@
 #include <loki/Visitor.h>
 #ifdef WIN32
 #include <WinSock2.h>
+#else
+#include <sys/time.h>
 #endif
 
 namespace lcss
