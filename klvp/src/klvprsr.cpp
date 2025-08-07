@@ -76,6 +76,7 @@ namespace lcss
         case TYPE::UNIVERSAL_SET: parser.onBeginSet(len, type_); break;
         case TYPE::SECURITY_UNIVERSAL_SET: parser.onBeginSet(len, type_); break;
         case TYPE::UNIVERSAL_ELEMENT: parser.onBeginSet(len, type_); break;
+        case TYPE::UNKNOWN: parser.onBeginSet(len, type_); break;
         }
     }
 }
@@ -283,7 +284,7 @@ void lcss::KLVParser::onEndSet()
             _pimpl->checksumElement_.value(val);
             memcpy(&cs, val, 2);
             unsigned short localCs = ntohs(cs);
-            if (!(bcc_16(_pimpl->sodb_.begin(), _pimpl->sodb_.end() - 2)) == localCs)
+            if (bcc_16(_pimpl->sodb_.begin(), _pimpl->sodb_.end() - 2) != localCs)
             {
                 onError("Invalid Checksum", 0);
             }

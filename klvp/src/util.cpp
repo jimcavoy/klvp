@@ -52,7 +52,7 @@ bool lcss::isLDSGroup(unsigned char key[], int len)
 	{
 		if (i > 15)
 			return false;
-		if (key[i] != lcss::LocalSetKey[i++])
+		if (key[i] != lcss::LocalSetKey[i])
 			return false;
 	}
 	return true;
