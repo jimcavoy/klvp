@@ -1,6 +1,5 @@
 {
   "dependencies": [
-    "ms-gsl",
     "sqlite3"
   ]
 }

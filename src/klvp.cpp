@@ -7,7 +7,6 @@
 #include "KLVPrintVisitor.h"
 
 #include <fstream>
-#include <gsl/gsl>
 #ifdef WIN32
 #include <conio.h>
 #endif 
@@ -45,7 +44,7 @@ int main(int argc, char* argv[])
         while (ifile.good())
         {
             ifile.read((char*)memblock, N);
-            p.parse({ memblock, gsl::narrow_cast<std::size_t>(ifile.gcount()) });
+            p.parse({ memblock, static_cast<size_t>(ifile.gcount()) });
         }
     }
     catch (...)

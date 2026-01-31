@@ -3,7 +3,7 @@
 
 #include "klvelmt.h"
 
-#include <gsl/gsl>
+#include <span>
 #include <memory>
 
 namespace lcss
@@ -27,7 +27,7 @@ namespace lcss
         KLVParser(); ///< Default constructor
         virtual ~KLVParser(); ///< class destructor
 
-        virtual void parse(gsl::span<const uint8_t> buffer);
+        virtual void parse(std::span<const uint8_t> buffer);
 
         virtual void onBeginSet(int len, TYPE type);
         virtual void onElement(lcss::KLVElement& klv);
@@ -57,7 +57,7 @@ namespace lcss
 
         void onEndSet() override;
 
-        void parse(gsl::span<const uint8_t> buffer) override;
+        void parse(std::span<const uint8_t> buffer) override;
     };
 }
 

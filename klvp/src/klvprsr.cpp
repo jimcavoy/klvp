@@ -141,7 +141,7 @@ static int getKLVSetSize(const uint8_t* stream, int sz)
 
 /// @brief Parse a MISB ST 0601 encoded stream in @p buffer.
 /// @param buffer [in] The buffer containing a MISB ST 0601 stream.
-void lcss::KLVParser::parse(gsl::span<const uint8_t> buffer)
+void lcss::KLVParser::parse(std::span<const uint8_t> buffer)
 {
     for (const uint8_t& b : buffer)
     {
@@ -340,7 +340,7 @@ void lcss::KLVSecuritySetParser::onEndSet()
 
 }
 
-void lcss::KLVSecuritySetParser::parse(gsl::span<const uint8_t> buffer)
+void lcss::KLVSecuritySetParser::parse(std::span<const uint8_t> buffer)
 {
     for (const uint8_t& b : buffer)
     {

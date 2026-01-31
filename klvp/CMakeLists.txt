@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.21)
 
 project(klvp
-  VERSION 1.0.2
+  VERSION 1.1.0
   DESCRIPTION "STANAG 4609 ST 0601 KLV parser library"
   LANGUAGES C CXX
 )
@@ -23,8 +23,6 @@ FetchContent_Declare(loki-lib
 FetchContent_MakeAvailable(loki-lib)
 FetchContent_GetProperties(loki-lib)
 set(LOKI_DIR "${loki-lib_SOURCE_DIR}")
-
-find_package(Microsoft.GSL CONFIG REQUIRED)
 
 add_library(klvp STATIC)
 
@@ -59,9 +57,7 @@ target_sources(klvp
 set_property(TARGET klvp PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # specify the C++ standard
-target_compile_features( klvp PUBLIC cxx_std_14)
-
-target_link_libraries(klvp PUBLIC Microsoft.GSL::GSL)
+target_compile_features( klvp PUBLIC cxx_std_20)
 
 if (WIN32)
 target_link_libraries(klvp PRIVATE wsock32 ws2_32)

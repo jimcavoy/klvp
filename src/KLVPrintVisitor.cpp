@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
-#include <gsl/gsl>
 #ifdef WIN32
 #include <WinSock2.h>
 #define OFFSET 12
@@ -420,7 +419,7 @@ namespace klv2xml
         memcpy(ss + 1 + bytesEncoded, value, klv.length());
 
         TestKLVSecuritySetParser ssp;
-        ssp.parse({ ss, gsl::narrow_cast<std::size_t>(klv.length() + bytesEncoded + 1) });
+        ssp.parse({ ss, static_cast<size_t>(klv.length() + bytesEncoded + 1)});
     }
 
     void KLVPrintVisitor::Visit(lcss::KLVDifferentialPressure& klv)
