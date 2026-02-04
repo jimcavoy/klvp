@@ -3,6 +3,7 @@
 #include "TestKLVSecuritySetParser.h"
 
 #include <cstdint>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #ifdef WIN32
@@ -44,8 +45,7 @@ namespace
 
     void printStringElement(const lcss::KLVElementImpl& klv)
     {
-        uint8_t buf[128];
-        memset(buf, 0, 128);
+        uint8_t buf[128]{};
         klv.value(buf);
         printString(className(klv).c_str(), klv.key(), buf, klv.length());
     }
@@ -92,8 +92,7 @@ namespace
             uint8_t c = 0x82;
             *buffer++ = c;
             uint16_t sz = htons(len);
-            uint8_t s[2];
-            memcpy(s, (void*)&sz, 2);
+            uint8_t s[2]{};
             *buffer++ = s[0];
             *buffer = s[1];
             bytesUsed = 3;
@@ -144,8 +143,7 @@ namespace klv2xml
 
     void KLVPrintVisitor::Visit(lcss::KLVChecksum& klv)
     {
-        uint8_t val[2];
-        memset(val, 0, 2);
+        uint8_t val[2]{};
         klv.value(val);
         char crc[16];
         sprintf_s(crc, "%#4.2x %#4.2x", val[0], val[1]);
