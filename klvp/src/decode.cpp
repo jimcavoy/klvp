@@ -326,7 +326,9 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVOutsideAirTemperature& klv)
 	{
-		nValue = (int)*klv.value();
+		char temperature;
+		memcpy(&temperature, klv.value(), 1);
+		nValue = (int)temperature;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVTargetLocationLatitude& klv)
