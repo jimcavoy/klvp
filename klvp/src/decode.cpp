@@ -369,15 +369,17 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVTargetErrorEstimateCE90& klv)
 	{
-		uint16_t LDS = 0;
-		memcpy(&LDS, klv.value(), 2);
+		uint16_t nVal;
+		memcpy(&nVal, klv.value(), 2);
+		uint16_t LDS = ntohs(nVal);
 		fValue = (4095.0 / 65535.0) * LDS;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVTargetErrorEstimateLE90& klv)
 	{
-		uint16_t LDS = 0;
-		memcpy(&LDS, klv.value(), 2);
+		uint16_t nVal;
+		memcpy(&nVal, klv.value(), 2);
+		uint16_t LDS = ntohs(nVal);
 		fValue = (4095.0 / 65535.0) * LDS;
 	}
 
