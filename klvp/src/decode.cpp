@@ -462,7 +462,7 @@ namespace lcss
 
 	void KLVDecodeVisitor::Visit(lcss::KLVPlatformFuelRemaining& klv)
 	{
-		short LDS = 0;
+		unsigned short LDS = 0;
 		memcpy(&LDS, klv.value(), 2);
 		LDS = ntohs(LDS);
 		fValue = (10000.0 / 65535.0) * LDS;
