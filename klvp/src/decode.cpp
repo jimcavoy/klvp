@@ -444,7 +444,7 @@ namespace lcss
 	void KLVDecodeVisitor::Visit(lcss::KLVRelativeHumidity& klv)
 	{
 		uint16_t LDS = (uint16_t)*klv.value();
-		fValue = (100 / 0xFF) * LDS;
+		fValue = (100.0 / 0xFF) * LDS;
 	}
 
 	void KLVDecodeVisitor::Visit(lcss::KLVPlatformGroundSpeed& klv)
