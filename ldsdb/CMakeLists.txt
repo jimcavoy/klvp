@@ -25,7 +25,7 @@ target_sources(ldsdb
 set_property(TARGET ldsdb PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # specify the C++ standard
-target_compile_features( ldsdb PUBLIC cxx_std_14)
+target_compile_features( ldsdb PUBLIC cxx_std_20)
 
 target_include_directories(ldsdb
   PUBLIC

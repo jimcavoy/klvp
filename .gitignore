@@ -17,3 +17,4 @@ Release/
 *.user
 Testing/Temporary/CTestCostData.txt
 Testing/Temporary/LastTest.log
+build-arm64/
