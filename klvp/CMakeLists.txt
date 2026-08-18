@@ -24,6 +24,19 @@ FetchContent_MakeAvailable(loki-lib)
 FetchContent_GetProperties(loki-lib)
 set(LOKI_DIR "${loki-lib_SOURCE_DIR}")
 
+
+if (LINUX)
+set(LIBUUID_STATIC TRUE)
+FetchContent_Declare(libuuid
+    GIT_REPOSITORY  https://github.com/gershnik/libuuid-cmake.git
+    GIT_TAG         v2.39.1
+    GIT_SHALLOW     TRUE
+)
+FetchContent_MakeAvailable(libuuid)
+FetchContent_GetProperties(libuuid)
+set(LIBUUID_DIR "${libuuid_SOURCE_DIR}")
+endif()
+
 add_library(klvp STATIC)
 
 target_sources(klvp
@@ -62,13 +75,14 @@ target_compile_features( klvp PUBLIC cxx_std_20)
 if (WIN32)
 target_link_libraries(klvp PRIVATE wsock32 ws2_32)
 else()
-target_link_libraries(klvp PRIVATE uuid)
+target_link_libraries(klvp PRIVATE $<BUILD_INTERFACE:uuid::uuid_static>)
 endif()
 
 target_include_directories(klvp
   PRIVATE 
     src
     include/klvp
+    ${LIBUUID_DIR}/include
   PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${LOKI_DIR}/include>
