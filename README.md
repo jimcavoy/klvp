@@ -69,12 +69,6 @@ sudo apt install gcc-linux-gnu g++-aarch64-linux-gnu
 Use `aarch64-toolchain.cmake` file to generate a cross-compile build system.  At the root of the project directory entry the following commands.
 
 ```
-cmake -B build-arm64 -S . -DCMAKE_TOOLCHAIN_FILE=aarch64-toolchain.cmake
-```
-
-CMake will report `Configuring incomplete, errors occurred!`.  Ignore this warning and enter this following command to complete the configuration and to download ARM64 packages from vcpkg.
-
-```
 cmake -B build-arm64 -S . -DCMAKE_TOOLCHAIN_FILE=aarch64-toolchain.cmake -DVCPKG_TARGET_TRIPLET=arm64-linux
 ```
 
@@ -88,7 +82,7 @@ cmake --build ./build-arm64
 Once the build completes, confirm that the generated binaries are compiled for the correct architecture using the `file` utility.
 
 ```
-file build-arm64\klv2xml
+file build-arm64/klv2xml
 ```
 
 #### Expected Output:

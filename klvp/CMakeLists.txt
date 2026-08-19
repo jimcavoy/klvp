@@ -27,6 +27,7 @@ set(LOKI_DIR "${loki-lib_SOURCE_DIR}")
 
 if (LINUX)
 set(LIBUUID_STATIC TRUE)
+add_compile_definitions(_GNU_SOURCE=1)
 FetchContent_Declare(libuuid
     GIT_REPOSITORY  https://github.com/gershnik/libuuid-cmake.git
     GIT_TAG         v2.39.1
