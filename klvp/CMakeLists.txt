@@ -24,6 +24,19 @@ FetchContent_MakeAvailable(loki-lib)
 FetchContent_GetProperties(loki-lib)
 set(LOKI_DIR "${loki-lib_SOURCE_DIR}")
 
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+set(LIBUUID_STATIC TRUE)
+add_compile_definitions(_GNU_SOURCE=1)
+FetchContent_Declare(libuuid
+    GIT_REPOSITORY  https://github.com/gershnik/libuuid-cmake.git
+    GIT_TAG         v2.39.1
+    GIT_SHALLOW     TRUE
+)
+FetchContent_MakeAvailable(libuuid)
+FetchContent_GetProperties(libuuid)
+set(LIBUUID_DIR "${libuuid_SOURCE_DIR}")
+endif()
+
 add_library(klvp STATIC)
 
 target_sources(klvp
@@ -61,10 +74,23 @@ target_compile_features( klvp PUBLIC cxx_std_20)
 
 if (WIN32)
 target_link_libraries(klvp PRIVATE wsock32 ws2_32)
-else()
+elseif(LINUX)
 target_link_libraries(klvp PRIVATE uuid)
+elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+target_link_libraries(klvp PRIVATE $<BUILD_INTERFACE:uuid::uuid_static>)
 endif()
 
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+target_include_directories(klvp
+  PRIVATE 
+    src
+    include/klvp
+    ${LIBUUID_DIR}/include
+  PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${LOKI_DIR}/include>
+)
+else()
 target_include_directories(klvp
   PRIVATE 
     src
@@ -73,6 +99,7 @@ target_include_directories(klvp
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${LOKI_DIR}/include>
 )
+endif()
 
 install (TARGETS klvp
   EXPORT klvp_export
